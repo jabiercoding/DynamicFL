@@ -142,7 +142,7 @@ public class Pangolin2Bench {
 		// percentage calculations
 		for (MethodDeclaration method : methodAndLocatedLines.keySet()) {
 			int located = methodAndLocatedLines.get(method);
-			int total = getNumberOfLoC(method);
+			int total = getNumberOfLoC(method.toString());
 			double percentage = (double) located / (double) total;
 			
 			if (percentage >= THRESHOLD_METHOD_LINES_PERCENTAGE) {
@@ -157,11 +157,13 @@ public class Pangolin2Bench {
 		}
 	}
 
-	public static int getNumberOfLoC(MethodDeclaration method) {
-		String methodS = method.toString();
+	/**
+	 * Number of LoC ignoring comments and empty lines
+	 */
+	public static int getNumberOfLoC(String code) {
 		String commentsRegex = "(?://.*)|(/\\*(?:.|[\\n\\r])*?\\*/)";
-		methodS = methodS.replaceAll(commentsRegex, "");
-		String[] lines = methodS.split("\r\n|\r|\n");
+		code = code.replaceAll(commentsRegex, "");
+		String[] lines = code.split("\r\n|\r|\n");
 		int total = 0;
 		for (int i = 0; i < lines.length; i++) {
 			String line = lines[i];
