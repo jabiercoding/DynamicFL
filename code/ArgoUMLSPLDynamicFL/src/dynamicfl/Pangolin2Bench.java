@@ -21,6 +21,14 @@ public class Pangolin2Bench {
 	// less or equal will be ignored
 	public static final double THRESHOLD_PANGOLIN_SCORE = 0.0;
 
+	// greater or equal will be considered whole class (without Refinement)
+	public static final double THRESHOLD_GLOBAL_CLASS_LINES_PERCENTAGE = 0.5;
+
+	// greater or equal will be considered whole class (without Refinement)
+	public static final double THRESHOLD_METHODS_PERCENTAGE = 0.75;
+	// but only classes with greater or equal number of methods
+	public static final double THRESHOLD_METHODS_TO_CALCULATE_PERCENTAGE = 1;
+
 	// less will be considered Refinement, greater or equal will be considered the
 	// whole method (without Refinement)
 	public static final double THRESHOLD_METHOD_LINES_PERCENTAGE = 0.5;
@@ -98,14 +106,19 @@ public class Pangolin2Bench {
 	/**
 	 * Create benchmark string
 	 * 
-	 * @param classAndLines
+	 * @param classAndLines.
+	 *            Key set is the absolute path to each Java file
 	 */
 	public static void createBenchmarkString(Map<String, List<Integer>> classAndLines) {
-		// total number of lines per method (or type if the statement was not inside a
-		// method)
-		Map<MethodDeclaration, Integer> methodAndLocatedLines = new LinkedHashMap<MethodDeclaration, Integer>();
-		Map<TypeDeclaration, Integer> typeAndLocatedLines = new LinkedHashMap<TypeDeclaration, Integer>();
+
+		// for each Java file
 		for (String javaClass : classAndLines.keySet()) {
+
+			// maps to calculate the total number of lines per method (or type if the
+			// statement was not inside a method)
+			Map<MethodDeclaration, Integer> methodAndLocatedLines = new LinkedHashMap<MethodDeclaration, Integer>();
+			Map<TypeDeclaration, Integer> typeAndLocatedLines = new LinkedHashMap<TypeDeclaration, Integer>();
+
 			// Prepare the parser
 			ASTParser parser = ASTParser.newParser(AST.JLS8);
 			parser.setKind(ASTParser.K_COMPILATION_UNIT);
@@ -137,23 +150,50 @@ public class Pangolin2Bench {
 					methodAndLocatedLines.put(method, total);
 				}
 			}
-		}
 
-		// percentage calculations
-		for (MethodDeclaration method : methodAndLocatedLines.keySet()) {
-			int located = methodAndLocatedLines.get(method);
-			int total = getNumberOfLoC(method.toString());
-			double percentage = (double) located / (double) total;
-			
-			if (percentage >= THRESHOLD_METHOD_LINES_PERCENTAGE) {
-				System.out.println(TraceIdUtils.getId(method));
-			} else {
-				System.out.println(TraceIdUtils.getId(method) + " Refinement");
+			// global LoC class level
+			int classLoC = getNumberOfLoC(cu.toString());
+			int fLoC = 0;
+			for (Integer l : methodAndLocatedLines.values()) {
+				fLoC += l;
 			}
-		}
+			for (Integer l : typeAndLocatedLines.values()) {
+				fLoC += l;
+			}
+			double per = (double) fLoC / (double) classLoC;
+			if (per >= THRESHOLD_GLOBAL_CLASS_LINES_PERCENTAGE) {
+				System.out.println(TraceIdUtils.getId((TypeDeclaration) cu.types().get(0)));
+				continue;
+			}
 
-		for (TypeDeclaration type : typeAndLocatedLines.keySet()) {
-			System.out.println(TraceIdUtils.getId(type) + " Refinement");
+			// percentage of methods involved in the feature
+			int classNMethods = GroundTruthExtractor.getMethods(cu).size();
+			if (classNMethods >= THRESHOLD_METHODS_TO_CALCULATE_PERCENTAGE) {
+				int fNMethods = methodAndLocatedLines.keySet().size();
+				double perc = (double) fNMethods / (double) classNMethods;
+				if (perc >= THRESHOLD_METHODS_PERCENTAGE) {
+					System.out.println(TraceIdUtils.getId((TypeDeclaration) cu.types().get(0)));
+					continue;
+				}
+			}
+
+			// at this point it was not a whole class trace
+			// percentage for each method
+			for (MethodDeclaration method : methodAndLocatedLines.keySet()) {
+				int located = methodAndLocatedLines.get(method);
+				int total = getNumberOfLoC(method.toString());
+				double percentage = (double) located / (double) total;
+
+				if (percentage >= THRESHOLD_METHOD_LINES_PERCENTAGE) {
+					System.out.println(TraceIdUtils.getId(method));
+				} else {
+					System.out.println(TraceIdUtils.getId(method) + " Refinement");
+				}
+			}
+
+			for (TypeDeclaration type : typeAndLocatedLines.keySet()) {
+				System.out.println(TraceIdUtils.getId(type) + " Refinement");
+			}
 		}
 	}
 
