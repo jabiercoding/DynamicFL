@@ -3,8 +3,10 @@ package dynamicfl;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -12,8 +14,9 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-import groundTruthExtractor.GroundTruthExtractor;
+import metricsCalculation.MetricsCalculation;
 import utils.FileUtils;
+import utils.JDTUtils;
 import utils.TraceIdUtils;
 
 public class Pangolin2Bench {
@@ -35,21 +38,50 @@ public class Pangolin2Bench {
 
 	public static void main(String[] args) {
 
+		File argoUMLSPLBenchmark = new File("C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark");
+
 		// We assume that the ArgoUMLSPLBenchmark is in a project in the workspace and
 		// the Original scenario was created and used for creating the Pangolin traces
-		File argoUMLsrc = new File(
-				"C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark/scenarios/ScenarioOriginalVariant/variants/Original.config/src");
+		File argoUMLsrc = new File(argoUMLSPLBenchmark,
+				"scenarios/ScenarioOriginalVariant/variants/Original.config/src");
 		if (!argoUMLsrc.exists()) {
 			System.out.println("Scenario has to be created first");
 			return;
 		}
 
-		// Parse pangolin results file
-		File pangolinResultsFile = new File("resultsPangolin/ACTIVITY_ADD_ELEMENTS.csv");
+		String[] features = new String[] { "ACTIVITY", "COLLABORATION", "DEPLOYMENT", "SEQUENCE", "STATE", "USECASE" };
+		for (String feature : features) {
+			System.out.println("\n" + feature);
+			
+			// Parse pangolin results file for a given feature
+			File featurePangolinResultsFile = new File("resultsPangolin/" + feature + "_ADD_ELEMENTS.csv");
+			// Ground truth for the given feature
+			File featureGroundTruthFile = new File(argoUMLSPLBenchmark, "groundTruth/" + feature + "DIAGRAM.txt");
 
-		Map<String, List<Integer>> classAndLines = parsePangolinCSV(pangolinResultsFile, argoUMLsrc);
+			Map<String, List<Integer>> classAndLines = parsePangolinCSV(featurePangolinResultsFile, argoUMLsrc);
 
-		createBenchmarkString(classAndLines);
+			List<String> results = getResultsInBenchmarkFormat(classAndLines);
+
+			// Metrics
+			System.out.println("Official Metrics");
+			List<String> groundTruth = FileUtils.getLinesOfFile(featureGroundTruthFile);
+			double precision = MetricsCalculation.getPrecision(groundTruth, results);
+			double recall = MetricsCalculation.getRecall(groundTruth, results);
+			double f1 = MetricsCalculation.getF1(precision, recall);
+			System.out.println("Precision: " + precision);
+			System.out.println("Recall: " + recall);
+			System.out.println("F1: " + f1);
+
+			System.out.println("\nUnofficial Class level metrics");
+			groundTruth = convertBenchTracesToClassLevel(groundTruth);
+			results = convertBenchTracesToClassLevel(results);
+			precision = MetricsCalculation.getPrecision(groundTruth, results);
+			recall = MetricsCalculation.getRecall(groundTruth, results);
+			f1 = MetricsCalculation.getF1(precision, recall);
+			System.out.println("Precision: " + precision);
+			System.out.println("Recall: " + recall);
+			System.out.println("F1: " + f1);
+		}
 	}
 
 	/**
@@ -109,10 +141,12 @@ public class Pangolin2Bench {
 	 * @param classAndLines.
 	 *            Key set is the absolute path to each Java file
 	 */
-	public static void createBenchmarkString(Map<String, List<Integer>> classAndLines) {
+	public static List<String> getResultsInBenchmarkFormat(Map<String, List<Integer>> classAbsPathAndLines) {
+
+		List<String> results = new ArrayList<String>();
 
 		// for each Java file
-		for (String javaClass : classAndLines.keySet()) {
+		for (String javaClass : classAbsPathAndLines.keySet()) {
 
 			// maps to calculate the total number of lines per method (or type if the
 			// statement was not inside a method)
@@ -127,12 +161,11 @@ public class Pangolin2Bench {
 			String source = FileUtils.getStringOfFile(new File(javaClass));
 			parser.setSource(source.toCharArray());
 			CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-			List<MethodDeclaration> methods = GroundTruthExtractor.getMethods(cu);
-			List<Integer> lines = classAndLines.get(javaClass);
+			List<MethodDeclaration> methods = JDTUtils.getMethods(cu);
+			List<Integer> lines = classAbsPathAndLines.get(javaClass);
 			for (int line : lines) {
 				int position = cu.getPosition(line, 0);
-				MethodDeclaration method = GroundTruthExtractor.getMethodThatContainsAPosition(methods, position,
-						position);
+				MethodDeclaration method = JDTUtils.getMethodThatContainsAPosition(methods, position, position);
 				if (method == null) {
 					TypeDeclaration type = (TypeDeclaration) cu.types().get(0);
 					Integer total = typeAndLocatedLines.get(type);
@@ -162,17 +195,17 @@ public class Pangolin2Bench {
 			}
 			double per = (double) fLoC / (double) classLoC;
 			if (per >= THRESHOLD_GLOBAL_CLASS_LINES_PERCENTAGE) {
-				System.out.println(TraceIdUtils.getId((TypeDeclaration) cu.types().get(0)));
+				results.add(TraceIdUtils.getId((TypeDeclaration) cu.types().get(0)));
 				continue;
 			}
 
 			// percentage of methods involved in the feature
-			int classNMethods = GroundTruthExtractor.getMethods(cu).size();
+			int classNMethods = JDTUtils.getMethods(cu).size();
 			if (classNMethods >= THRESHOLD_METHODS_TO_CALCULATE_PERCENTAGE) {
 				int fNMethods = methodAndLocatedLines.keySet().size();
 				double perc = (double) fNMethods / (double) classNMethods;
 				if (perc >= THRESHOLD_METHODS_PERCENTAGE) {
-					System.out.println(TraceIdUtils.getId((TypeDeclaration) cu.types().get(0)));
+					results.add(TraceIdUtils.getId((TypeDeclaration) cu.types().get(0)));
 					continue;
 				}
 			}
@@ -185,16 +218,18 @@ public class Pangolin2Bench {
 				double percentage = (double) located / (double) total;
 
 				if (percentage >= THRESHOLD_METHOD_LINES_PERCENTAGE) {
-					System.out.println(TraceIdUtils.getId(method));
+					results.add(TraceIdUtils.getId(method));
 				} else {
-					System.out.println(TraceIdUtils.getId(method) + " Refinement");
+					results.add(TraceIdUtils.getId(method) + " Refinement");
 				}
 			}
 
 			for (TypeDeclaration type : typeAndLocatedLines.keySet()) {
-				System.out.println(TraceIdUtils.getId(type) + " Refinement");
+				results.add(TraceIdUtils.getId(type) + " Refinement");
 			}
 		}
+
+		return results;
 	}
 
 	/**
@@ -216,5 +251,18 @@ public class Pangolin2Bench {
 			total++;
 		}
 		return total;
+	}
+	
+	public static List<String> convertBenchTracesToClassLevel(List<String> traces) {
+		List<String> converted = new ArrayList<String>();
+		for (String s : traces) {
+			// truncate to get only the class name
+			converted.add(s.split(" ")[0]);
+		}
+		// remove duplicated entries
+		Set<String> s = new LinkedHashSet<>(converted);
+		converted.clear();
+		converted.addAll(s);
+		return converted;
 	}
 }
