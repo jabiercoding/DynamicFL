@@ -14,7 +14,7 @@ import utils.FileUtils;
 public class Pangolin2Bench {
 
 	// less or equal will be ignored
-	public static final double THRESHOLD_PANGOLIN_SCORE = 0.0;
+	public static final double THRESHOLD_PANGOLIN_SCORE = 0.5;
 
 	public static void main(String[] args) {
 
