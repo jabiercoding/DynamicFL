@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import metricsCalculation.MetricsCalculation;
+import utils.FeatureUtils;
 import utils.FileUtils;
 
 public class Pangolin2Bench {
@@ -28,19 +29,29 @@ public class Pangolin2Bench {
 			System.out.println("Scenario has to be created first");
 			return;
 		}
-
-		String[] features = new String[] { "ACTIVITY", "COLLABORATION", "DEPLOYMENT", "SEQUENCE", "STATE", "USECASE" };
-		for (String feature : features) {
-			System.out.println("\n" + feature);
+		
+		// Scenario path
+		String scenarioPath = "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark/scenarios/ScenarioTraditionalVariants";
+		String featuresInfoPath = "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark/featuresInfo/features.txt";
+		FeatureUtils fUtils = new FeatureUtils(scenarioPath, featuresInfoPath);
+		
+		for (String currentFeature : fUtils.getFeatureIds()) {
+			// XXX for the moment we skip features that are not diagrams
+			if(currentFeature.equals("COGNITIVE") || currentFeature.equals("LOGGING")) {
+				continue;
+			}
+			
+			System.out.println("\n" + currentFeature);
 
 			// Parse pangolin results file for a given feature
-			File featurePangolinResultsFile = new File("resultsPangolin/" + feature + "_ADD_ELEMENTS.csv");
+			// TODO Pangolin results should use feature IDs. Then remove the replaceAll here
+			File featurePangolinResultsFile = new File("resultsPangolin/" + currentFeature.replaceAll("DIAGRAM", "") + "_ADD_ELEMENTS.csv");
 			// Ground truth for the given feature
-			File featureGroundTruthFile = new File(argoUMLSPLBenchmark, "groundTruth/" + feature + "DIAGRAM.txt");
+			File featureGroundTruthFile = new File(argoUMLSPLBenchmark, "groundTruth/" + currentFeature + ".txt");
 
 			Map<String, List<Integer>> classAndLines = parsePangolinCSV(featurePangolinResultsFile, argoUMLsrc);
 
-			List<String> results = LineTraces2Bench.getResultsInBenchmarkFormat(classAndLines);
+			List<String> results = LineTraces2Bench.getResultsInBenchmarkFormat(classAndLines, currentFeature, fUtils);
 
 			// Metrics
 			System.out.println("Official Metrics");

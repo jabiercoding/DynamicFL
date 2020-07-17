@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import utils.FeatureUtils;
 import utils.FileUtils;
 import utils.JDTUtils;
 import utils.TraceIdUtils;
@@ -29,19 +30,25 @@ public class LineTraces2Bench {
 	// less will be considered Refinement, greater or equal will be considered the
 	// whole method (without Refinement)
 	public static final double THRESHOLD_METHOD_LINES_PERCENTAGE = 0.5;
-	
+
 	/**
 	 * Create benchmark string
+	 * 
+	 * @param scenarioPath
+	 * @param feature
 	 * 
 	 * @param classAndLines.
 	 *            Key set is the absolute path to each Java file
 	 */
-	public static List<String> getResultsInBenchmarkFormat(Map<String, List<Integer>> classAbsPathAndLines) {
+	public static List<String> getResultsInBenchmarkFormat(Map<String, List<Integer>> classAbsPathAndLines,
+			String feature, FeatureUtils fUtils) {
 
 		List<String> results = new ArrayList<String>();
 
 		// for each Java file
 		for (String javaClass : classAbsPathAndLines.keySet()) {
+
+			boolean isFeatureClass = isFeatureClass(javaClass, feature, fUtils);
 
 			// maps to calculate the total number of lines per method (or type if the
 			// statement was not inside a method)
@@ -126,7 +133,46 @@ public class LineTraces2Bench {
 
 		return results;
 	}
-	
+
+	/**
+	 * Class is in all variants with F and it is not present in any variant without
+	 * F, AND the same methods are in all variants with the same line/statements
+	 * 
+	 * @param javaClass
+	 * @param feature
+	 * @param fUtils
+	 * @return feature class
+	 */
+	private static boolean isFeatureClass(String javaClass, String feature, FeatureUtils fUtils) {
+		List<String> containingF = fUtils.getConfigurationsContainingFeature(feature);
+		List<String> notContainingF = fUtils.getConfigurationsNotContainingFeature(feature);
+
+		String relativePathInScenario = javaClass.substring(javaClass.indexOf("src"), javaClass.length());
+		
+		// Must not appear in variants without the feature
+		for (String config : notContainingF) {
+			File variantFolder = fUtils.getVariantFolderOfConfig(config);
+			File java = new File(variantFolder, relativePathInScenario);
+			if (java.exists()) {
+				return false;
+			}
+		}
+		
+		// Must appear in variants with the feature and with the same content
+		for (String config : containingF) {
+			File variantFolder = fUtils.getVariantFolderOfConfig(config);
+			File java = new File(variantFolder, relativePathInScenario);
+			if (!java.exists()) {
+				return false;
+			} else {
+				// TODO check that it is the same content
+			}
+		}
+		
+
+		return true;
+	}
+
 	/**
 	 * Number of LoC ignoring comments and empty lines
 	 */
@@ -147,5 +193,5 @@ public class LineTraces2Bench {
 		}
 		return total;
 	}
-	
+
 }
