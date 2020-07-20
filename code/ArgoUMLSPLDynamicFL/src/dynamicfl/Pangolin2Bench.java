@@ -36,16 +36,17 @@ public class Pangolin2Bench {
 		FeatureUtils fUtils = new FeatureUtils(scenarioPath, featuresInfoPath);
 		
 		for (String currentFeature : fUtils.getFeatureIds()) {
-			// XXX for the moment we skip features that are not diagrams
-			if(currentFeature.equals("COGNITIVE") || currentFeature.equals("LOGGING")) {
-				continue;
-			}
 			
 			System.out.println("\n" + currentFeature);
 
 			// Parse pangolin results file for a given feature
 			// TODO Pangolin results should use feature IDs. Then remove the replaceAll here
-			File featurePangolinResultsFile = new File("resultsPangolin/" + currentFeature.replaceAll("DIAGRAM", "") + "_ADD_ELEMENTS.csv");
+			File featurePangolinResultsFile = new File("resultsPangolin2/" + currentFeature.replaceAll("DIAGRAM", "") + "_ADD_ELEMENTS.csv");
+			if(!featurePangolinResultsFile.exists()) {
+				System.out.println("Skipping "+ currentFeature + ": " + featurePangolinResultsFile.getAbsolutePath() + " does not exist.");
+				continue;
+			}
+			
 			// Ground truth for the given feature
 			File featureGroundTruthFile = new File(argoUMLSPLBenchmark, "groundTruth/" + currentFeature + ".txt");
 

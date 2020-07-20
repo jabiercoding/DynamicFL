@@ -86,30 +86,34 @@ public class LineTraces2Bench {
 				}
 			}
 
-			// global LoC class level
-			int classLoC = getNumberOfLoC(cu.toString());
-			int fLoC = 0;
-			for (Integer l : methodAndLocatedLines.values()) {
-				fLoC += l;
-			}
-			for (Integer l : typeAndLocatedLines.values()) {
-				fLoC += l;
-			}
-			double per = (double) fLoC / (double) classLoC;
-			if (per >= THRESHOLD_GLOBAL_CLASS_LINES_PERCENTAGE) {
-				results.add(TraceIdUtils.getId((TypeDeclaration) cu.types().get(0)));
-				continue;
-			}
-
-			// percentage of methods involved in the feature
-			int classNMethods = JDTUtils.getMethods(cu).size();
-			if (classNMethods >= THRESHOLD_METHODS_TO_CALCULATE_PERCENTAGE) {
-				int fNMethods = methodAndLocatedLines.keySet().size();
-				double perc = (double) fNMethods / (double) classNMethods;
-				if (perc >= THRESHOLD_METHODS_PERCENTAGE) {
+			if (isFeatureClass) {
+				
+				// global LoC class level
+				int classLoC = getNumberOfLoC(cu.toString());
+				int fLoC = 0;
+				for (Integer l : methodAndLocatedLines.values()) {
+					fLoC += l;
+				}
+				for (Integer l : typeAndLocatedLines.values()) {
+					fLoC += l;
+				}
+				double per = (double) fLoC / (double) classLoC;
+				if (per >= THRESHOLD_GLOBAL_CLASS_LINES_PERCENTAGE) {
 					results.add(TraceIdUtils.getId((TypeDeclaration) cu.types().get(0)));
 					continue;
 				}
+
+				// percentage of methods involved in the feature
+				int classNMethods = JDTUtils.getMethods(cu).size();
+				if (classNMethods >= THRESHOLD_METHODS_TO_CALCULATE_PERCENTAGE) {
+					int fNMethods = methodAndLocatedLines.keySet().size();
+					double perc = (double) fNMethods / (double) classNMethods;
+					if (perc >= THRESHOLD_METHODS_PERCENTAGE) {
+						results.add(TraceIdUtils.getId((TypeDeclaration) cu.types().get(0)));
+						continue;
+					}
+				}
+
 			}
 
 			// at this point it was not a whole class trace
@@ -136,7 +140,7 @@ public class LineTraces2Bench {
 
 	/**
 	 * Class is in all variants with F and it is not present in any variant without
-	 * F, AND the same methods are in all variants with the same line/statements
+	 * F
 	 * 
 	 * @param javaClass
 	 * @param feature
@@ -148,7 +152,7 @@ public class LineTraces2Bench {
 		List<String> notContainingF = fUtils.getConfigurationsNotContainingFeature(feature);
 
 		String relativePathInScenario = javaClass.substring(javaClass.indexOf("src"), javaClass.length());
-		
+
 		// Must not appear in variants without the feature
 		for (String config : notContainingF) {
 			File variantFolder = fUtils.getVariantFolderOfConfig(config);
@@ -157,7 +161,45 @@ public class LineTraces2Bench {
 				return false;
 			}
 		}
-		
+
+		// Must appear in variants with the feature and with the same content
+		for (String config : containingF) {
+			File variantFolder = fUtils.getVariantFolderOfConfig(config);
+			File java = new File(variantFolder, relativePathInScenario);
+			if (!java.exists()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Class is in all variants with F and it is not present in any variant without
+	 * F, AND the same methods are in all variants with the same line/statements
+	 * 
+	 * @param javaClass
+	 * @param feature
+	 * @param fUtils
+	 * @return feature class
+	 */
+	private static boolean isFeatureClassWithSameContent(String javaClass, String feature, FeatureUtils fUtils) {
+		List<String> containingF = fUtils.getConfigurationsContainingFeature(feature);
+		List<String> notContainingF = fUtils.getConfigurationsNotContainingFeature(feature);
+
+		File originalJava = new File(javaClass);
+		String originalContent = FileUtils.getStringOfFile(originalJava).trim();
+
+		String relativePathInScenario = javaClass.substring(javaClass.indexOf("src"), javaClass.length());
+
+		// Must not appear in variants without the feature
+		for (String config : notContainingF) {
+			File variantFolder = fUtils.getVariantFolderOfConfig(config);
+			File java = new File(variantFolder, relativePathInScenario);
+			if (java.exists()) {
+				return false;
+			}
+		}
+
 		// Must appear in variants with the feature and with the same content
 		for (String config : containingF) {
 			File variantFolder = fUtils.getVariantFolderOfConfig(config);
@@ -165,11 +207,13 @@ public class LineTraces2Bench {
 			if (!java.exists()) {
 				return false;
 			} else {
-				// TODO check that it is the same content
+				String variantContent = FileUtils.getStringOfFile(java).trim();
+				if (!originalContent.equals(variantContent)) {
+					// TODO not working very well, also memory problems
+					return false;
+				}
 			}
 		}
-		
-
 		return true;
 	}
 
