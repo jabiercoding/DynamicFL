@@ -48,7 +48,13 @@ public class LineTraces2Bench {
 		// for each Java file
 		for (String javaClass : classAbsPathAndLines.keySet()) {
 
+			// Class is in all variants with F and it is not present in any variant without
+			// F
 			boolean isFeatureClass = isFeatureClass(javaClass, feature, fUtils);
+			if (!isFeatureClass) {
+				// It cannot be related to this feature, discard class
+				continue;
+			}
 
 			// maps to calculate the total number of lines per method (or type if the
 			// statement was not inside a method)
@@ -86,39 +92,42 @@ public class LineTraces2Bench {
 				}
 			}
 
-			if (isFeatureClass) {
-				
-				// global LoC class level
-				int classLoC = getNumberOfLoC(cu.toString());
-				int fLoC = 0;
-				for (Integer l : methodAndLocatedLines.values()) {
-					fLoC += l;
-				}
-				for (Integer l : typeAndLocatedLines.values()) {
-					fLoC += l;
-				}
-				double per = (double) fLoC / (double) classLoC;
-				if (per >= THRESHOLD_GLOBAL_CLASS_LINES_PERCENTAGE) {
+			// global LoC class level
+			int classLoC = getNumberOfLoC(cu.toString());
+			int fLoC = 0;
+			for (Integer l : methodAndLocatedLines.values()) {
+				fLoC += l;
+			}
+			for (Integer l : typeAndLocatedLines.values()) {
+				fLoC += l;
+			}
+			double per = (double) fLoC / (double) classLoC;
+			if (per >= THRESHOLD_GLOBAL_CLASS_LINES_PERCENTAGE) {
+				results.add(TraceIdUtils.getId((TypeDeclaration) cu.types().get(0)));
+				continue;
+			}
+
+			// percentage of methods involved in the feature
+			int classNMethods = JDTUtils.getMethods(cu).size();
+			if (classNMethods >= THRESHOLD_METHODS_TO_CALCULATE_PERCENTAGE) {
+				int fNMethods = methodAndLocatedLines.keySet().size();
+				double perc = (double) fNMethods / (double) classNMethods;
+				if (perc >= THRESHOLD_METHODS_PERCENTAGE) {
 					results.add(TraceIdUtils.getId((TypeDeclaration) cu.types().get(0)));
 					continue;
 				}
-
-				// percentage of methods involved in the feature
-				int classNMethods = JDTUtils.getMethods(cu).size();
-				if (classNMethods >= THRESHOLD_METHODS_TO_CALCULATE_PERCENTAGE) {
-					int fNMethods = methodAndLocatedLines.keySet().size();
-					double perc = (double) fNMethods / (double) classNMethods;
-					if (perc >= THRESHOLD_METHODS_PERCENTAGE) {
-						results.add(TraceIdUtils.getId((TypeDeclaration) cu.types().get(0)));
-						continue;
-					}
-				}
-
 			}
 
 			// at this point it was not a whole class trace
 			// percentage for each method
 			for (MethodDeclaration method : methodAndLocatedLines.keySet()) {
+
+				// Is feature method
+				boolean isFeatureMethod = isFeatureMethod(javaClass, method, feature, fUtils);
+				if (!isFeatureMethod) {
+					continue;
+				}
+
 				int located = methodAndLocatedLines.get(method);
 				int total = getNumberOfLoC(method.toString());
 				double percentage = (double) located / (double) total;
@@ -136,6 +145,72 @@ public class LineTraces2Bench {
 		}
 
 		return results;
+	}	
+	
+	/**
+	 * Method is in all variants with F (when the class exists) and it is not
+	 * present in any variant without F (when the class exists)
+	 * 
+	 * @param javaClass
+	 * @param method
+	 * @param feature
+	 * @param fUtils
+	 * @return
+	 */
+	private static boolean isFeatureMethod(String javaClass, MethodDeclaration method, String feature,
+			FeatureUtils fUtils) {
+		List<String> containingF = fUtils.getConfigurationsContainingFeature(feature);
+		List<String> notContainingF = fUtils.getConfigurationsNotContainingFeature(feature);
+
+		String relativePathInScenario = javaClass.substring(javaClass.indexOf("src"), javaClass.length());
+
+		String originalId = TraceIdUtils.getId(method);
+
+		// Must not appear in variants without the feature
+		for (String config : notContainingF) {
+			File variantFolder = fUtils.getVariantFolderOfConfig(config);
+			File java = new File(variantFolder, relativePathInScenario);
+			if (java.exists()) {
+				ASTParser parser = ASTParser.newParser(AST.JLS8);
+				parser.setKind(ASTParser.K_COMPILATION_UNIT);
+				parser.setBindingsRecovery(true);
+				String source = FileUtils.getStringOfFile(java);
+				parser.setSource(source.toCharArray());
+				CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+				for (MethodDeclaration m : JDTUtils.getMethods(cu)) {
+					String variantId = TraceIdUtils.getId(m);
+					if (originalId.equals(variantId)) {
+						return false;
+					}
+				}
+			}
+		}
+
+		// Must appear in variants with the feature
+		for (String config : containingF) {
+			File variantFolder = fUtils.getVariantFolderOfConfig(config);
+			File java = new File(variantFolder, relativePathInScenario);
+			if (java.exists()) {
+				ASTParser parser = ASTParser.newParser(AST.JLS8);
+				parser.setKind(ASTParser.K_COMPILATION_UNIT);
+				parser.setBindingsRecovery(true);
+				String source = FileUtils.getStringOfFile(java);
+				parser.setSource(source.toCharArray());
+				CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+				boolean found = false;
+				for (MethodDeclaration m : JDTUtils.getMethods(cu)) {
+					String variantId = TraceIdUtils.getId(m);
+					if (originalId.equals(variantId)) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -162,56 +237,12 @@ public class LineTraces2Bench {
 			}
 		}
 
-		// Must appear in variants with the feature and with the same content
+		// Must appear in variants with the feature
 		for (String config : containingF) {
 			File variantFolder = fUtils.getVariantFolderOfConfig(config);
 			File java = new File(variantFolder, relativePathInScenario);
 			if (!java.exists()) {
 				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Class is in all variants with F and it is not present in any variant without
-	 * F, AND the same methods are in all variants with the same line/statements
-	 * 
-	 * @param javaClass
-	 * @param feature
-	 * @param fUtils
-	 * @return feature class
-	 */
-	private static boolean isFeatureClassWithSameContent(String javaClass, String feature, FeatureUtils fUtils) {
-		List<String> containingF = fUtils.getConfigurationsContainingFeature(feature);
-		List<String> notContainingF = fUtils.getConfigurationsNotContainingFeature(feature);
-
-		File originalJava = new File(javaClass);
-		String originalContent = FileUtils.getStringOfFile(originalJava).trim();
-
-		String relativePathInScenario = javaClass.substring(javaClass.indexOf("src"), javaClass.length());
-
-		// Must not appear in variants without the feature
-		for (String config : notContainingF) {
-			File variantFolder = fUtils.getVariantFolderOfConfig(config);
-			File java = new File(variantFolder, relativePathInScenario);
-			if (java.exists()) {
-				return false;
-			}
-		}
-
-		// Must appear in variants with the feature and with the same content
-		for (String config : containingF) {
-			File variantFolder = fUtils.getVariantFolderOfConfig(config);
-			File java = new File(variantFolder, relativePathInScenario);
-			if (!java.exists()) {
-				return false;
-			} else {
-				String variantContent = FileUtils.getStringOfFile(java).trim();
-				if (!originalContent.equals(variantContent)) {
-					// TODO not working very well, also memory problems
-					return false;
-				}
 			}
 		}
 		return true;
