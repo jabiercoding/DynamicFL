@@ -17,7 +17,14 @@ import utils.FileUtils;
 import utils.JDTUtils;
 import utils.TraceIdUtils;
 
-public class LineTraces2Bench {
+/**
+ * LineTraces to Bench aims to convert lines of code to the format of the
+ * benchmark making some assumptions e.g., when a class or a method is
+ * sufficiently covered to be considered as full or as Refinement tag
+ * 
+ * @author jabier.martinez
+ */
+public class LineTraces2BenchFormat {
 
 	// greater or equal will be considered whole class (without Refinement)
 	public static final double THRESHOLD_GLOBAL_CLASS_LINES_PERCENTAGE = 0.5;
@@ -37,8 +44,7 @@ public class LineTraces2Bench {
 	 * @param scenarioPath
 	 * @param feature
 	 * 
-	 * @param classAndLines.
-	 *            Key set is the absolute path to each Java file
+	 * @param classAndLines. Key set is the absolute path to each Java file
 	 */
 	public static List<String> getResultsInBenchmarkFormat(Map<String, List<Integer>> classAbsPathAndLines,
 			String feature, FeatureUtils fUtils) {
@@ -145,8 +151,8 @@ public class LineTraces2Bench {
 		}
 
 		return results;
-	}	
-	
+	}
+
 	/**
 	 * Method is in all variants with F (when the class exists) and it is not
 	 * present in any variant without F (when the class exists)

@@ -1,4 +1,4 @@
-package dynamicfl;
+package dynamicfl.pangolin;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -8,11 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import dynamicfl.LineTraces2BenchFormat;
 import metricsCalculation.MetricsCalculation;
 import utils.FeatureUtils;
 import utils.FileUtils;
 
-public class Pangolin2Bench {
+public class MainPangolin {
 
 	// less or equal will be ignored
 	public static final double THRESHOLD_PANGOLIN_SCORE = 0.5;
@@ -86,7 +87,7 @@ public class Pangolin2Bench {
 					Map<String, List<Integer>> classAndLines = parsePangolinCSV(featurePangolinResultsFile,
 							originalArgoUMLsrc);
 
-					List<String> results = LineTraces2Bench.getResultsInBenchmarkFormat(classAndLines, currentFeature,
+					List<String> results = LineTraces2BenchFormat.getResultsInBenchmarkFormat(classAndLines, currentFeature,
 							fUtils);
 
 					// Save to file
