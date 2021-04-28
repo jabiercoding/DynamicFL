@@ -25,8 +25,10 @@ public class MainSpectrum {
 	final static String PATH_ARGOUMLSPL_BENCHMARK = "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark";
 	
 	public static void main(String[] args) {
-
+		
 		try {
+			
+			File output = new File("output/output_" + System.currentTimeMillis());
 			
 			Map<String, Map<String, List<Integer>>> featExec = GabrielaDatasetReader.getFeatExec(PATH_DATASET_EXECUTIONS);
 
@@ -44,7 +46,9 @@ public class MainSpectrum {
 				ISpectra<String> spectra = provider.loadSpectra();
 				IFaultLocalizer<String> localizer = new Jaccard<String>();
 				Ranking<String> ranking = localizer.localize(spectra);
-				ranking.save(feature + "_resulting-ranking.txt");
+				File featRankingFile = new File(output, localizer.getName() + "/" + feature + ".txt");
+				featRankingFile.getParentFile().mkdirs();
+				ranking.save(featRankingFile.getAbsolutePath());
 
 				// Add to the results if greater or equal to the threshold
 				System.out.println("\nFeature: " + feature + "\n");
@@ -68,7 +72,7 @@ public class MainSpectrum {
 			}
 			
 			// Compute results
-			DynamicFL2BenchResults.compute(PATH_ARGOUMLSPL_BENCHMARK, results, new File("output"));
+			DynamicFL2BenchResults.compute(PATH_ARGOUMLSPL_BENCHMARK, results, output);
 
 		} catch (Exception e) {
 			e.printStackTrace();
