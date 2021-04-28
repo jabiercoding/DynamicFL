@@ -20,12 +20,10 @@ public class DynamicFL2BenchResults {
 	 * 
 	 * @param pathToArgoUMLSPLBenchmark e.g., "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark"
 	 */
-	public static void compute(String pathToArgoUMLSPLBenchmark, Map<String,Map<String, List<Integer>>> featureClassAndLines) {
+	public static void compute(String pathToArgoUMLSPLBenchmark, Map<String,Map<String, List<Integer>>> featureClassAndLines, File output) {
 		
 		// Input path to the benchmark
 		File argoUMLSPLBenchmark = new File(pathToArgoUMLSPLBenchmark);
-		// Output paht for results
-		File output = new File("output");
 
 		output.mkdirs();
 
