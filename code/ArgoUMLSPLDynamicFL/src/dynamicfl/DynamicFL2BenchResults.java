@@ -18,8 +18,8 @@ public class DynamicFL2BenchResults {
 	/**
 	 * Compute results
 	 * 
-	 * @param pathToArgoUMLSPLBenchmark e.g.,
-	 *                                  "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark"
+	 * @param pathToArgoUMLSPLBenchmark
+	 *            e.g., "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark"
 	 * @return map of scenario, feature, (precision, recall, f1, classPrecision,
 	 *         classRecall, classF1)
 	 */
@@ -90,8 +90,8 @@ public class DynamicFL2BenchResults {
 						classAndLines = new HashMap<String, List<Integer>>();
 					}
 
-					Map<String, List<Integer>> absPathAndLines = transformToAbsPathAndLines(originalArgoUMLsrc,
-							classAndLines);
+					Map<String, List<Integer>> absPathAndLines = transformToAbsPathAndLines(currentFeature,
+							originalArgoUMLsrc, classAndLines);
 
 					List<String> results = LineTraces2BenchFormat.getResultsInBenchmarkFormat(absPathAndLines,
 							currentFeature, fUtils);
@@ -145,6 +145,7 @@ public class DynamicFL2BenchResults {
 
 	/**
 	 * Results to file
+	 * 
 	 * @param result
 	 * @param output
 	 */
@@ -168,16 +169,102 @@ public class DynamicFL2BenchResults {
 
 	/**
 	 * Transform to absolute paths, keep the same lines
+	 * 
 	 * @param originalArgoUMLsrc
 	 * @param classAndLines
 	 * @return
 	 */
-	private static Map<String, List<Integer>> transformToAbsPathAndLines(File originalArgoUMLsrc,
+	private static Map<String, List<Integer>> transformToAbsPathAndLines(String currentFeature, File originalArgoUMLsrc,
 			Map<String, List<Integer>> classAndLines) {
 		Map<String, List<Integer>> result = new LinkedHashMap<String, List<Integer>>();
 		for (String key : classAndLines.keySet()) {
 			String absPath = key.replaceAll("\\.", "\\\\");
 			absPath = absPath + ".java";
+			// Cut the method signature from the end of the class name
+			if (absPath.contains("("))
+				absPath = absPath.substring(0, absPath.lastIndexOf("\\")) + ".java";
+
+			if (currentFeature.equals("STATEDIAGRAM")) {
+				// Replace the name of the Inner Class by the Class name of the file where the
+				// Inner Class is contained
+				if (absPath.contains(
+						"org\\argouml\\uml\\ui\\behavior\\state_machines\\UMLCallEventOperationComboBox2.java") || absPath.contains(
+								"org\\argouml\\uml\\ui\\behavior\\state_machines\\UMLCallEventOperationComboBoxModel.java"))
+					absPath = "org\\argouml\\uml\\ui\\behavior\\state_machines\\PropPanelCallEvent.java";
+				if (absPath.contains("org\\argouml\\uml\\ui\\behavior\\common_behavior\\ActionCreateArgument.java"))
+					absPath = "org\\argouml\\uml\\ui\\behavior\\common_behavior\\PropPanelAction.java";
+			}
+			
+			if (currentFeature.equals("ACTIVITYDIAGRAM")) {
+				// Replace the name of the Inner Class by the Class name of the file where the
+				// Inner Class is contained
+				if (absPath.contains(
+						"org\\argouml\\uml\\ui\\behavior\\common_behavior\\UMLActionSequenceActionListModel.java") || absPath.contains(
+								"org\\argouml\\uml\\ui\\behavior\\common_behavior\\UMLActionSequenceActionList.java"))
+					absPath = "org\\argouml\\uml\\ui\\behavior\\common_behavior\\PropPanelActionSequence.java";
+				if (absPath.contains(
+						"org\\argouml\\uml\\ui\\behavior\\activity_graphs\\UMLPartitionActivityGraphListModel.java") || absPath.contains(
+								"org\\argouml\\uml\\ui\\behavior\\activity_graphs\\UMLPartitionContentListModel.java"))
+					absPath = "org\\argouml\\uml\\ui\\behavior\\activity_graphs\\PropPanelPartition.java";
+				if (absPath.contains(
+						"org\\argouml\\uml\\ui\\behavior\\state_machines\\UMLCallEventOperationComboBox2.java") || absPath.contains(
+								"org\\argouml\\uml\\ui\\behavior\\state_machines\\UMLCallEventOperationComboBoxModel.java"))
+					absPath = "org\\argouml\\uml\\ui\\behavior\\state_machines\\PropPanelCallEvent.java";
+				if (absPath.contains(
+						"org\\argouml\\uml\\ui\\behavior\\common_behavior\\ActionCreateArgument.java"))
+					absPath = "org\\argouml\\uml\\ui\\behavior\\common_behavior\\PropPanelAction.java";
+			}
+			
+			
+			if (currentFeature.equals("USECASEDIAGRAM")) {
+				// Replace the name of the Inner Class by the Class name of the file where the
+				// Inner Class is contained
+				if (absPath.contains(
+						"org\\argouml\\uml\\diagram\\ui\\FigAssociationEndAnnotation.java") || absPath.contains(
+								"org\\argouml\\uml\\diagram\\ui\\FigOrdering.java"))
+					absPath = "org\\argouml\\uml\\diagram\\ui\\FigAssociation.java";
+				if (absPath.contains(
+						"org\\argouml\\cognitive\\checklist\\ui\\TableModelChecklist.java"))
+					absPath = "org\\argouml\\cognitive\\checklist\\ui\\TabChecklist.java";
+			}
+			
+			if (currentFeature.equals("COLLABORATIONDIAGRAM")) {
+				// Replace the name of the Inner Class by the Class name of the file where the
+				// Inner Class is contained
+				if (absPath.contains(
+						"org\\argouml\\uml\\diagram\\collaboration\\ui\\FigMessageGroup.java"))
+					absPath = "org\\argouml\\uml\\diagram\\collaboration\\ui\\FigAssociationRole.java";
+				if (absPath.contains(
+						"org\\argouml\\uml\\diagram\\ui\\FigAssociationEndAnnotation.java"))
+					absPath = "org\\argouml\\uml\\diagram\\ui\\FigAssociation.java";
+				if (absPath.contains(
+						"org\\argouml\\util\\TokenSep.java"))
+					absPath = "org\\argouml\\util\\MyTokenizer.java";
+				
+			}
+			
+			if (currentFeature.equals("DEPLOYMENTDIAGRAM")) {
+				// Replace the name of the Inner Class by the Class name of the file where the
+				// Inner Class is contained
+				if (absPath.contains(
+						"org\\argouml\\uml\\ui\\behavior\\common_behavior\\UMLLinkAssociationComboBoxModel.java") || absPath.contains(
+								"org\\argouml\\uml\\ui\\behavior\\common_behavior\\ActionSetLinkAssociation.java"))
+					absPath = "org\\argouml\\uml\\ui\\behavior\\common_behavior\\PropPanelLink.java";
+				if (absPath.contains(
+						"org\\argouml\\uml\\diagram\\ui\\FigAssociationEndAnnotation.java") || absPath.contains(
+								"org\\argouml\\uml\\diagram\\ui\\FigOrdering.java"))
+					absPath = "org\\argouml\\uml\\diagram\\ui\\FigAssociation.java";
+				if (absPath.contains(
+						"org\\argouml\\cognitive\\checklist\\ui\\TableModelChecklist.java"))
+					absPath = "org\\argouml\\cognitive\\checklist\\ui\\TabChecklist.java";
+				if (absPath.contains(
+						"org\\argouml\\uml\\diagram\\ui\\FigRole.java"))
+					absPath = "org\\argouml\\uml\\diagram\\ui\\FigAssociation.java";
+				if (absPath.contains(
+						"org\\argouml\\uml\\ui\\foundation\\core\\UMLNodeDeployedComponentListModel.java"))
+					absPath = "org\\argouml\\uml\\ui\\foundation\\core\\PropPanelNode.java";
+			}
+			
 			File absFile = new File(originalArgoUMLsrc, absPath);
 			// Filter files which are not part of the originalArgoUMLsrc (libraries etc.)
 			if (!absFile.exists()) {
@@ -207,19 +294,19 @@ public class DynamicFL2BenchResults {
 		converted.addAll(s);
 		return converted;
 	}
-	
+
 	public static double getAvgPrecision(Map<String, Map<String, List<Double>>> result) {
-		return getAvg(result,0);
+		return getAvg(result, 0);
 	}
-	
+
 	public static double getAvgRecall(Map<String, Map<String, List<Double>>> result) {
-		return getAvg(result,1);
+		return getAvg(result, 1);
 	}
-	
+
 	public static double getAvgF1(Map<String, Map<String, List<Double>>> result) {
-		return getAvg(result,2);
+		return getAvg(result, 2);
 	}
-	
+
 	private static double getAvg(Map<String, Map<String, List<Double>>> result, int index) {
 		double avg = 0;
 		double numFeat = 0;
@@ -228,7 +315,7 @@ public class DynamicFL2BenchResults {
 			for (String feature : scenarioFeatures.keySet()) {
 				List<Double> metrics = scenarioFeatures.get(feature);
 				if (!metrics.get(0).isNaN()) {
-					avg+=metrics.get(index);
+					avg += metrics.get(index);
 					numFeat++;
 				}
 			}
