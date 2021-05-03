@@ -48,7 +48,7 @@ public class MainSpectrum {
 				// Get the ranking from the SBFL technique
 				MySpectraProvider provider = new MySpectraProvider(feature, featExec);
 				ISpectra<String> spectra = provider.loadSpectra();
-				IFaultLocalizer<String> localizer = new Jaccard<String>();
+				IFaultLocalizer<String> localizer = new Ochiai<String>();
 				Ranking<String> ranking = localizer.localize(spectra);
 				File featRankingFile = new File(output, localizer.getName() + "/" + feature + ".txt");
 				featRankingFile.getParentFile().mkdirs();

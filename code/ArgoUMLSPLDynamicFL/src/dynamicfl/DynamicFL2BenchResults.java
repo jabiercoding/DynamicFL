@@ -178,92 +178,16 @@ public class DynamicFL2BenchResults {
 			Map<String, List<Integer>> classAndLines) {
 		Map<String, List<Integer>> result = new LinkedHashMap<String, List<Integer>>();
 		for (String key : classAndLines.keySet()) {
-			String absPath = key.replaceAll("\\.", "\\\\");
+			
+			// check of innerclasses
+			String absPath = key + "";
+			String innerClassCase = getCompilationUnitFromClass(key);
+			if (innerClassCase != null) {
+				absPath = innerClassCase;
+			}
+			
+			absPath = absPath.replaceAll("\\.", "\\\\");
 			absPath = absPath + ".java";
-			// Cut the method signature from the end of the class name
-			if (absPath.contains("("))
-				absPath = absPath.substring(0, absPath.lastIndexOf("\\")) + ".java";
-
-			if (currentFeature.equals("STATEDIAGRAM")) {
-				// Replace the name of the Inner Class by the Class name of the file where the
-				// Inner Class is contained
-				if (absPath.contains(
-						"org\\argouml\\uml\\ui\\behavior\\state_machines\\UMLCallEventOperationComboBox2.java") || absPath.contains(
-								"org\\argouml\\uml\\ui\\behavior\\state_machines\\UMLCallEventOperationComboBoxModel.java"))
-					absPath = "org\\argouml\\uml\\ui\\behavior\\state_machines\\PropPanelCallEvent.java";
-				if (absPath.contains("org\\argouml\\uml\\ui\\behavior\\common_behavior\\ActionCreateArgument.java"))
-					absPath = "org\\argouml\\uml\\ui\\behavior\\common_behavior\\PropPanelAction.java";
-			}
-			
-			if (currentFeature.equals("ACTIVITYDIAGRAM")) {
-				// Replace the name of the Inner Class by the Class name of the file where the
-				// Inner Class is contained
-				if (absPath.contains(
-						"org\\argouml\\uml\\ui\\behavior\\common_behavior\\UMLActionSequenceActionListModel.java") || absPath.contains(
-								"org\\argouml\\uml\\ui\\behavior\\common_behavior\\UMLActionSequenceActionList.java"))
-					absPath = "org\\argouml\\uml\\ui\\behavior\\common_behavior\\PropPanelActionSequence.java";
-				if (absPath.contains(
-						"org\\argouml\\uml\\ui\\behavior\\activity_graphs\\UMLPartitionActivityGraphListModel.java") || absPath.contains(
-								"org\\argouml\\uml\\ui\\behavior\\activity_graphs\\UMLPartitionContentListModel.java"))
-					absPath = "org\\argouml\\uml\\ui\\behavior\\activity_graphs\\PropPanelPartition.java";
-				if (absPath.contains(
-						"org\\argouml\\uml\\ui\\behavior\\state_machines\\UMLCallEventOperationComboBox2.java") || absPath.contains(
-								"org\\argouml\\uml\\ui\\behavior\\state_machines\\UMLCallEventOperationComboBoxModel.java"))
-					absPath = "org\\argouml\\uml\\ui\\behavior\\state_machines\\PropPanelCallEvent.java";
-				if (absPath.contains(
-						"org\\argouml\\uml\\ui\\behavior\\common_behavior\\ActionCreateArgument.java"))
-					absPath = "org\\argouml\\uml\\ui\\behavior\\common_behavior\\PropPanelAction.java";
-			}
-			
-			
-			if (currentFeature.equals("USECASEDIAGRAM")) {
-				// Replace the name of the Inner Class by the Class name of the file where the
-				// Inner Class is contained
-				if (absPath.contains(
-						"org\\argouml\\uml\\diagram\\ui\\FigAssociationEndAnnotation.java") || absPath.contains(
-								"org\\argouml\\uml\\diagram\\ui\\FigOrdering.java"))
-					absPath = "org\\argouml\\uml\\diagram\\ui\\FigAssociation.java";
-				if (absPath.contains(
-						"org\\argouml\\cognitive\\checklist\\ui\\TableModelChecklist.java"))
-					absPath = "org\\argouml\\cognitive\\checklist\\ui\\TabChecklist.java";
-			}
-			
-			if (currentFeature.equals("COLLABORATIONDIAGRAM")) {
-				// Replace the name of the Inner Class by the Class name of the file where the
-				// Inner Class is contained
-				if (absPath.contains(
-						"org\\argouml\\uml\\diagram\\collaboration\\ui\\FigMessageGroup.java"))
-					absPath = "org\\argouml\\uml\\diagram\\collaboration\\ui\\FigAssociationRole.java";
-				if (absPath.contains(
-						"org\\argouml\\uml\\diagram\\ui\\FigAssociationEndAnnotation.java"))
-					absPath = "org\\argouml\\uml\\diagram\\ui\\FigAssociation.java";
-				if (absPath.contains(
-						"org\\argouml\\util\\TokenSep.java"))
-					absPath = "org\\argouml\\util\\MyTokenizer.java";
-				
-			}
-			
-			if (currentFeature.equals("DEPLOYMENTDIAGRAM")) {
-				// Replace the name of the Inner Class by the Class name of the file where the
-				// Inner Class is contained
-				if (absPath.contains(
-						"org\\argouml\\uml\\ui\\behavior\\common_behavior\\UMLLinkAssociationComboBoxModel.java") || absPath.contains(
-								"org\\argouml\\uml\\ui\\behavior\\common_behavior\\ActionSetLinkAssociation.java"))
-					absPath = "org\\argouml\\uml\\ui\\behavior\\common_behavior\\PropPanelLink.java";
-				if (absPath.contains(
-						"org\\argouml\\uml\\diagram\\ui\\FigAssociationEndAnnotation.java") || absPath.contains(
-								"org\\argouml\\uml\\diagram\\ui\\FigOrdering.java"))
-					absPath = "org\\argouml\\uml\\diagram\\ui\\FigAssociation.java";
-				if (absPath.contains(
-						"org\\argouml\\cognitive\\checklist\\ui\\TableModelChecklist.java"))
-					absPath = "org\\argouml\\cognitive\\checklist\\ui\\TabChecklist.java";
-				if (absPath.contains(
-						"org\\argouml\\uml\\diagram\\ui\\FigRole.java"))
-					absPath = "org\\argouml\\uml\\diagram\\ui\\FigAssociation.java";
-				if (absPath.contains(
-						"org\\argouml\\uml\\ui\\foundation\\core\\UMLNodeDeployedComponentListModel.java"))
-					absPath = "org\\argouml\\uml\\ui\\foundation\\core\\PropPanelNode.java";
-			}
 			
 			File absFile = new File(originalArgoUMLsrc, absPath);
 			// Filter files which are not part of the originalArgoUMLsrc (libraries etc.)
@@ -271,7 +195,14 @@ public class DynamicFL2BenchResults {
 				System.err.println(absFile.getAbsolutePath() + " does not exist");
 				continue;
 			}
-			result.put(absFile.getAbsolutePath(), classAndLines.get(key));
+			
+			// in case of same files (i.e., inner classes)
+			List<Integer> current = classAndLines.get(key);
+			List<Integer> previous = result.get(absFile.getAbsolutePath());
+			if (previous != null) {
+				current.addAll(previous);
+			}
+			result.put(absFile.getAbsolutePath(), current);
 		}
 		return result;
 	}
@@ -293,6 +224,57 @@ public class DynamicFL2BenchResults {
 		converted.clear();
 		converted.addAll(s);
 		return converted;
+	}
+	
+	/**
+	 * Replace the name of the Inner Class by the Class name of the file where the
+	 * Inner Class is contained
+	 * 
+	 * @param potentialInnerClass
+	 * @return null or the class containing the inner class
+	 */
+	public static String getCompilationUnitFromClass(String innerClass) {
+
+		if (innerClass.contains("org.argouml.uml.ui.behavior.state_machines.UMLCallEventOperationComboBox2")
+				|| innerClass.contains("org.argouml.uml.ui.behavior.state_machines.UMLCallEventOperationComboBoxModel"))
+			return "org.argouml.uml.ui.behavior.state_machines.PropPanelCallEvent";
+
+		if (innerClass.contains("org.argouml.uml.ui.behavior.common_behavior.ActionCreateArgument"))
+			return "org.argouml.uml.ui.behavior.common_behavior.PropPanelAction";
+
+		if (innerClass.contains("org.argouml.uml.ui.behavior.common_behavior.UMLActionSequenceActionListModel")
+				|| innerClass.contains("org.argouml.uml.ui.behavior.common_behavior.UMLActionSequenceActionList"))
+			return "org.argouml.uml.ui.behavior.common_behavior.PropPanelActionSequence";
+
+		if (innerClass.contains("org.argouml.uml.ui.behavior.activity_graphs.UMLPartitionActivityGraphListModel")
+				|| innerClass.contains("org.argouml.uml.ui.behavior.activity_graphs.UMLPartitionContentListModel"))
+			return "org.argouml.uml.ui.behavior.activity_graphs.PropPanelPartition";
+
+		if (innerClass.contains("org.argouml.uml.diagram.ui.FigAssociationEndAnnotation")
+				|| innerClass.contains("org.argouml.uml.diagram.ui.FigOrdering")
+				|| innerClass.contains("org.argouml.uml.diagram.ui.FigRole"))
+			return "org.argouml.uml.diagram.ui.FigAssociation";
+
+		if (innerClass.contains("org.argouml.cognitive.checklist.ui.TableModelChecklist"))
+			return "org.argouml.cognitive.checklist.ui.TabChecklist";
+
+		if (innerClass.contains("org.argouml.uml.diagram.collaboration.ui.FigMessageGroup"))
+			return "org.argouml.uml.diagram.collaboration.ui.FigAssociationRole";
+
+		if (innerClass.contains("org.argouml.util.TokenSep"))
+			return "org.argouml.util.MyTokenizer";
+
+		if (innerClass.contains("org.argouml.uml.ui.behavior.common_behavior.UMLLinkAssociationComboBoxModel")
+				|| innerClass.contains("org.argouml.uml.ui.behavior.common_behavior.ActionSetLinkAssociation"))
+			return "org.argouml.uml.ui.behavior.common_behavior.PropPanelLink";
+
+		if (innerClass.contains("org.argouml.cognitive.checklist.ui.TableModelChecklist"))
+			return "org.argouml.cognitive.checklist.ui.TabChecklist";
+
+		if (innerClass.contains("org.argouml.uml.ui.foundation.core.UMLNodeDeployedComponentListModel"))
+			return "org.argouml.uml.ui.foundation.core.PropPanelNode";
+
+		return null;
 	}
 
 	public static double getAvgPrecision(Map<String, Map<String, List<Double>>> result) {
