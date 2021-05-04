@@ -47,19 +47,21 @@ public class LineTraces2BenchFormat {
 	 * @param classAndLines. Key set is the absolute path to each Java file
 	 */
 	public static List<String> getResultsInBenchmarkFormat(Map<String, List<Integer>> classAbsPathAndLines,
-			String feature, FeatureUtils fUtils) {
+			String feature, FeatureUtils fUtils, boolean crossVariantsCheck) {
 
 		List<String> results = new ArrayList<String>();
 
 		// for each Java file
 		for (String javaClass : classAbsPathAndLines.keySet()) {
 
-			// Class is in all variants with F and it is not present in any variant without
-			// F
-			boolean isFeatureClass = isFeatureClass(javaClass, feature, fUtils);
-			if (!isFeatureClass) {
-				// It cannot be related to this feature, discard class
-				continue;
+			if (crossVariantsCheck) {
+				// Class is in all variants with F and it is not present in any variant without
+				// F
+				boolean isFeatureClass = isFeatureClass(javaClass, feature, fUtils);
+				if (!isFeatureClass) {
+					// It cannot be related to this feature, discard class
+					continue;
+				}
 			}
 
 			// maps to calculate the total number of lines per method (or type if the
@@ -128,10 +130,13 @@ public class LineTraces2BenchFormat {
 			// percentage for each method
 			for (MethodDeclaration method : methodAndLocatedLines.keySet()) {
 
-				// Is feature method
-				boolean isFeatureMethod = isFeatureMethod(javaClass, method, feature, fUtils);
-				if (!isFeatureMethod) {
-					continue;
+				if (crossVariantsCheck) {
+					// Is feature method
+					// TODO avoid to have AnonymousMethods, filter them somewhere
+					boolean isFeatureMethod = isFeatureMethod(javaClass, method, feature, fUtils);
+					if (!isFeatureMethod) {
+						continue;
+					}
 				}
 
 				int located = methodAndLocatedLines.get(method);
@@ -165,6 +170,7 @@ public class LineTraces2BenchFormat {
 	 */
 	private static boolean isFeatureMethod(String javaClass, MethodDeclaration method, String feature,
 			FeatureUtils fUtils) {
+		// TODO make it work for feature interactions "_and_"
 		List<String> containingF = fUtils.getConfigurationsContainingFeature(feature);
 		List<String> notContainingF = fUtils.getConfigurationsNotContainingFeature(feature);
 
@@ -229,6 +235,7 @@ public class LineTraces2BenchFormat {
 	 * @return feature class
 	 */
 	private static boolean isFeatureClass(String javaClass, String feature, FeatureUtils fUtils) {
+		// TODO make it work for feature interactions "_and_"
 		List<String> containingF = fUtils.getConfigurationsContainingFeature(feature);
 		List<String> notContainingF = fUtils.getConfigurationsNotContainingFeature(feature);
 

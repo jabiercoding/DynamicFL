@@ -18,8 +18,8 @@ public class DynamicFL2BenchResults {
 	/**
 	 * Compute results
 	 * 
-	 * @param pathToArgoUMLSPLBenchmark
-	 *            e.g., "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark"
+	 * @param pathToArgoUMLSPLBenchmark e.g.,
+	 *                                  "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark"
 	 * @return map of scenario, feature, (precision, recall, f1, classPrecision,
 	 *         classRecall, classF1)
 	 */
@@ -72,7 +72,8 @@ public class DynamicFL2BenchResults {
 				File outputScenario = new File(output, scenario.getName());
 				outputScenario.mkdirs();
 
-				for (String currentFeature : fUtils.getFeatureIds()) {
+				// for (String currentFeature : fUtils.getFeatureIds()) {
+				for (String currentFeature : featureClassAndLines.keySet()) {
 
 					List<Double> resultFeature = new ArrayList<Double>();
 					resultScenario.put(currentFeature, resultFeature);
@@ -94,7 +95,7 @@ public class DynamicFL2BenchResults {
 							originalArgoUMLsrc, classAndLines);
 
 					List<String> results = LineTraces2BenchFormat.getResultsInBenchmarkFormat(absPathAndLines,
-							currentFeature, fUtils);
+							currentFeature, fUtils, true);
 
 					// Save to file
 
@@ -113,29 +114,34 @@ public class DynamicFL2BenchResults {
 
 					// Metrics
 					System.out.println("Official Metrics");
-					List<String> groundTruth = FileUtils.getLinesOfFile(featureGroundTruthFile);
-					double precision = MetricsCalculation.getPrecision(groundTruth, results);
-					double recall = MetricsCalculation.getRecall(groundTruth, results);
-					double f1 = MetricsCalculation.getF1(precision, recall);
-					System.out.println("Precision: " + precision);
-					System.out.println("Recall: " + recall);
-					System.out.println("F1: " + f1);
-					resultFeature.add(precision);
-					resultFeature.add(recall);
-					resultFeature.add(f1);
+					if (!featureGroundTruthFile.exists()) {
+						System.out.println(
+								"Results found for " + currentFeature + " but it does not exist in the GroundTruth");
+					} else {
+						List<String> groundTruth = FileUtils.getLinesOfFile(featureGroundTruthFile);
+						double precision = MetricsCalculation.getPrecision(groundTruth, results);
+						double recall = MetricsCalculation.getRecall(groundTruth, results);
+						double f1 = MetricsCalculation.getF1(precision, recall);
+						System.out.println("Precision: " + precision);
+						System.out.println("Recall: " + recall);
+						System.out.println("F1: " + f1);
+						resultFeature.add(precision);
+						resultFeature.add(recall);
+						resultFeature.add(f1);
 
-					System.out.println("\nUnofficial Class level metrics");
-					List<String> groundTruth2 = convertBenchTracesToClassLevel(groundTruth);
-					List<String> results2 = convertBenchTracesToClassLevel(results);
-					double precision2 = MetricsCalculation.getPrecision(groundTruth2, results2);
-					double recall2 = MetricsCalculation.getRecall(groundTruth2, results2);
-					double f12 = MetricsCalculation.getF1(precision2, recall2);
-					System.out.println("Precision: " + precision2);
-					System.out.println("Recall: " + recall2);
-					System.out.println("F1: " + f12);
-					resultFeature.add(precision2);
-					resultFeature.add(recall2);
-					resultFeature.add(f12);
+						System.out.println("\nUnofficial Class level metrics");
+						List<String> groundTruth2 = convertBenchTracesToClassLevel(groundTruth);
+						List<String> results2 = convertBenchTracesToClassLevel(results);
+						double precision2 = MetricsCalculation.getPrecision(groundTruth2, results2);
+						double recall2 = MetricsCalculation.getRecall(groundTruth2, results2);
+						double f12 = MetricsCalculation.getF1(precision2, recall2);
+						System.out.println("Precision: " + precision2);
+						System.out.println("Recall: " + recall2);
+						System.out.println("F1: " + f12);
+						resultFeature.add(precision2);
+						resultFeature.add(recall2);
+						resultFeature.add(f12);
+					}
 				}
 			}
 		}
@@ -156,10 +162,12 @@ public class DynamicFL2BenchResults {
 				Map<String, List<Double>> scenarioFeatures = result.get(scenario);
 				for (String feature : scenarioFeatures.keySet()) {
 					List<Double> metrics = scenarioFeatures.get(feature);
-					FileUtils.appendToFile(output,
-							scenario + ";" + feature + ";" + metrics.get(0) + ";" + metrics.get(1) + ";"
-									+ metrics.get(2) + ";" + metrics.get(3) + ";" + metrics.get(4) + ";"
-									+ metrics.get(5));
+					if (metrics != null && !metrics.isEmpty()) {
+						FileUtils.appendToFile(output,
+								scenario + ";" + feature + ";" + metrics.get(0) + ";" + metrics.get(1) + ";"
+										+ metrics.get(2) + ";" + metrics.get(3) + ";" + metrics.get(4) + ";"
+										+ metrics.get(5));
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -178,24 +186,24 @@ public class DynamicFL2BenchResults {
 			Map<String, List<Integer>> classAndLines) {
 		Map<String, List<Integer>> result = new LinkedHashMap<String, List<Integer>>();
 		for (String key : classAndLines.keySet()) {
-			
+
 			// check of innerclasses
 			String absPath = key + "";
 			String innerClassCase = getCompilationUnitFromClass(key);
 			if (innerClassCase != null) {
 				absPath = innerClassCase;
 			}
-			
+
 			absPath = absPath.replaceAll("\\.", "\\\\");
 			absPath = absPath + ".java";
-			
+
 			File absFile = new File(originalArgoUMLsrc, absPath);
 			// Filter files which are not part of the originalArgoUMLsrc (libraries etc.)
 			if (!absFile.exists()) {
 				System.err.println(absFile.getAbsolutePath() + " does not exist");
 				continue;
 			}
-			
+
 			// in case of same files (i.e., inner classes)
 			List<Integer> current = classAndLines.get(key);
 			List<Integer> previous = result.get(absFile.getAbsolutePath());
@@ -225,7 +233,7 @@ public class DynamicFL2BenchResults {
 		converted.addAll(s);
 		return converted;
 	}
-	
+
 	/**
 	 * Replace the name of the Inner Class by the Class name of the file where the
 	 * Inner Class is contained
@@ -296,9 +304,11 @@ public class DynamicFL2BenchResults {
 			Map<String, List<Double>> scenarioFeatures = result.get(scenario);
 			for (String feature : scenarioFeatures.keySet()) {
 				List<Double> metrics = scenarioFeatures.get(feature);
-				if (!metrics.get(0).isNaN()) {
-					avg += metrics.get(index);
-					numFeat++;
+				if (metrics != null && !metrics.isEmpty()) {
+					if (!metrics.get(0).isNaN()) {
+						avg += metrics.get(index);
+						numFeat++;
+					}
 				}
 			}
 		}

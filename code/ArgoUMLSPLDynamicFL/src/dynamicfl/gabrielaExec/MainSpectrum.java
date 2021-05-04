@@ -27,11 +27,18 @@ public class MainSpectrum {
 			Map<String, Map<String, List<Integer>>> featExec = GabrielaDatasetReader
 					.getFeatExec(PATH_DATASET_EXECUTIONS);
 
+			
+			long start = System.currentTimeMillis();
+			
 			// get sbl results
 			IFaultLocalizer<String> algo = new Ochiai<String>();
 			double threshold_sbfl = 0.5;
 			Map<String, Map<String, List<Integer>>> results = SpectrumBasedLocalization.locate(featExec, algo, threshold_sbfl,
 					output);
+			
+			long end = System.currentTimeMillis();
+			long elapsedTime = end - start;
+			System.out.println("\nTime in seconds for feature location: " + (elapsedTime / 1000.0));
 
 			// compute metrics
 			// scenario, feature, (precision, recall, f1, classPrecision, classRecall,
