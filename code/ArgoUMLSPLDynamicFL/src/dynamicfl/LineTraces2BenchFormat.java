@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -77,10 +78,12 @@ public class LineTraces2BenchFormat {
 			String source = FileUtils.getStringOfFile(new File(javaClass));
 			parser.setSource(source.toCharArray());
 			CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-			List<MethodDeclaration> methods = JDTUtils.getMethods(cu);
+			List<MethodDeclaration> methods = getMethods(cu);
 			List<Integer> lines = classAbsPathAndLines.get(javaClass);
 			for (int line : lines) {
 				int position = cu.getPosition(line, 0);
+				// TODO check if position inside anonymous classes can be anonymous classes
+				// inside a "real" method
 				MethodDeclaration method = JDTUtils.getMethodThatContainsAPosition(methods, position, position);
 				if (method == null) {
 					TypeDeclaration type = (TypeDeclaration) cu.types().get(0);
@@ -132,7 +135,6 @@ public class LineTraces2BenchFormat {
 
 				if (crossVariantsCheck) {
 					// Is feature method
-					// TODO avoid to have AnonymousMethods, filter them somewhere
 					boolean isFeatureMethod = isFeatureMethod(javaClass, method, feature, fUtils);
 					if (!isFeatureMethod) {
 						continue;
@@ -189,7 +191,7 @@ public class LineTraces2BenchFormat {
 				String source = FileUtils.getStringOfFile(java);
 				parser.setSource(source.toCharArray());
 				CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-				for (MethodDeclaration m : JDTUtils.getMethods(cu)) {
+				for (MethodDeclaration m : getMethods(cu)) {
 					String variantId = TraceIdUtils.getId(m);
 					if (originalId.equals(variantId)) {
 						return false;
@@ -210,7 +212,7 @@ public class LineTraces2BenchFormat {
 				parser.setSource(source.toCharArray());
 				CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 				boolean found = false;
-				for (MethodDeclaration m : JDTUtils.getMethods(cu)) {
+				for (MethodDeclaration m : getMethods(cu)) {
 					String variantId = TraceIdUtils.getId(m);
 					if (originalId.equals(variantId)) {
 						found = true;
@@ -280,6 +282,24 @@ public class LineTraces2BenchFormat {
 			total++;
 		}
 		return total;
+	}
+
+	/**
+	 * Get methods ignoring those in anonymous classes
+	 * 
+	 * @param cu
+	 * @return
+	 */
+	public static List<MethodDeclaration> getMethods(CompilationUnit cu) {
+		List<MethodDeclaration> methods = JDTUtils.getMethods(cu);
+		List<MethodDeclaration> toRemove = new ArrayList<MethodDeclaration>();
+		for (MethodDeclaration method : methods) {
+			if (method.getParent() instanceof AnonymousClassDeclaration) {
+				toRemove.add(method);
+			}
+		}
+		methods.removeAll(toRemove);
+		return methods;
 	}
 
 }

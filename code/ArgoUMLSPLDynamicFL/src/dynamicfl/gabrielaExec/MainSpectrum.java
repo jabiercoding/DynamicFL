@@ -54,10 +54,10 @@ public class MainSpectrum {
 			System.out.println("Avg. Recall:\t" + avgRecall);
 			System.out.println("Avg. F1:\t" + avgF1);
 
-			System.out.println("\nResults from SPLC 2020");
-			System.out.println("2020 Precision:\t0.068333333");
-			System.out.println("2020 Recall:\t0.318333333");
-			System.out.println("2020 F1:\t0.105");
+			System.out.println("\nResults from VAMOS 2021");
+			System.out.println("2021 Precision:\t0.068333333");
+			System.out.println("2021 Recall:\t0.318333333");
+			System.out.println("2021 F1:\t0.105");
 
 			// Results from 2020 solution
 //			ActivityDiagram	0.05	0.24	0.08

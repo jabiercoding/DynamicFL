@@ -260,7 +260,8 @@ public class DynamicFL2BenchResults {
 
 		if (innerClass.contains("org.argouml.uml.diagram.ui.FigAssociationEndAnnotation")
 				|| innerClass.contains("org.argouml.uml.diagram.ui.FigOrdering")
-				|| innerClass.contains("org.argouml.uml.diagram.ui.FigRole"))
+				|| innerClass.contains("org.argouml.uml.diagram.ui.FigRole")
+				|| innerClass.contains("org.argouml.uml.diagram.ui.FigMultiplicity"))
 			return "org.argouml.uml.diagram.ui.FigAssociation";
 
 		if (innerClass.contains("org.argouml.cognitive.checklist.ui.TableModelChecklist"))
@@ -281,6 +282,12 @@ public class DynamicFL2BenchResults {
 
 		if (innerClass.contains("org.argouml.uml.ui.foundation.core.UMLNodeDeployedComponentListModel"))
 			return "org.argouml.uml.ui.foundation.core.PropPanelNode";
+		
+		if (innerClass.contains("org.argouml.model.mdr.Registry")) {
+			return "org.argouml.model.mdr.ModelEventPumpMDRImpl";
+		}
+		
+		
 
 		return null;
 	}

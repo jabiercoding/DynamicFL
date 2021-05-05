@@ -43,7 +43,7 @@ public class SpectrumBasedLocalization {
 				Ranking<String> ranking = localizer.localize(spectra);
 
 				if (output != null) {
-					File featRankingFile = new File(output, localizer.getName() + "/" + feature + ".txt");
+					File featRankingFile = new File(output, localizer.getName() + "/" + feature + "_ranking.txt");
 					featRankingFile.getParentFile().mkdirs();
 					ranking.save(featRankingFile.getAbsolutePath());
 				}
