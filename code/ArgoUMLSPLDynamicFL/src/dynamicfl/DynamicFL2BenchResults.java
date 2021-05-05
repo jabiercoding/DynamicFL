@@ -194,7 +194,7 @@ public class DynamicFL2BenchResults {
 				absPath = innerClassCase;
 			}
 
-			//absPath = absPath.replaceAll("\\.", "/");
+			// absPath = absPath.replaceAll("\\.", "/");
 			absPath = absPath.replace('.', File.separatorChar);
 			absPath = absPath + ".java";
 
@@ -244,47 +244,47 @@ public class DynamicFL2BenchResults {
 	 */
 	public static String getCompilationUnitFromClass(String innerClass) {
 		// TODO ask Gabriela if we can change contains with equals or startsWith
-		if (innerClass.contains("org.argouml.uml.ui.behavior.state_machines.UMLCallEventOperationComboBox2")
-				|| innerClass.contains("org.argouml.uml.ui.behavior.state_machines.UMLCallEventOperationComboBoxModel"))
+		if (innerClass.equals("org.argouml.uml.ui.behavior.state_machines.UMLCallEventOperationComboBox2")
+				|| innerClass.equals("org.argouml.uml.ui.behavior.state_machines.UMLCallEventOperationComboBoxModel"))
 			return "org.argouml.uml.ui.behavior.state_machines.PropPanelCallEvent";
 
-		if (innerClass.contains("org.argouml.uml.ui.behavior.common_behavior.ActionCreateArgument"))
+		if (innerClass.equals("org.argouml.uml.ui.behavior.common_behavior.ActionCreateArgument"))
 			return "org.argouml.uml.ui.behavior.common_behavior.PropPanelAction";
 
-		if (innerClass.contains("org.argouml.uml.ui.behavior.common_behavior.UMLActionSequenceActionListModel")
-				|| innerClass.contains("org.argouml.uml.ui.behavior.common_behavior.UMLActionSequenceActionList"))
+		if (innerClass.equals("org.argouml.uml.ui.behavior.common_behavior.UMLActionSequenceActionListModel")
+				|| innerClass.equals("org.argouml.uml.ui.behavior.common_behavior.UMLActionSequenceActionList"))
 			return "org.argouml.uml.ui.behavior.common_behavior.PropPanelActionSequence";
 
-		if (innerClass.contains("org.argouml.uml.ui.behavior.activity_graphs.UMLPartitionActivityGraphListModel")
-				|| innerClass.contains("org.argouml.uml.ui.behavior.activity_graphs.UMLPartitionContentListModel"))
+		if (innerClass.equals("org.argouml.uml.ui.behavior.activity_graphs.UMLPartitionActivityGraphListModel")
+				|| innerClass.equals("org.argouml.uml.ui.behavior.activity_graphs.UMLPartitionContentListModel"))
 			return "org.argouml.uml.ui.behavior.activity_graphs.PropPanelPartition";
 
-		if (innerClass.contains("org.argouml.uml.diagram.ui.FigAssociationEndAnnotation")
-				|| innerClass.contains("org.argouml.uml.diagram.ui.FigOrdering")
-				|| innerClass.contains("org.argouml.uml.diagram.ui.FigRole")
-				|| innerClass.contains("org.argouml.uml.diagram.ui.FigMultiplicity"))
+		if (innerClass.equals("org.argouml.uml.diagram.ui.FigAssociationEndAnnotation")
+				|| innerClass.equals("org.argouml.uml.diagram.ui.FigOrdering")
+				|| innerClass.equals("org.argouml.uml.diagram.ui.FigRole")
+				|| innerClass.equals("org.argouml.uml.diagram.ui.FigMultiplicity"))
 			return "org.argouml.uml.diagram.ui.FigAssociation";
 
-		if (innerClass.contains("org.argouml.cognitive.checklist.ui.TableModelChecklist"))
+		if (innerClass.equals("org.argouml.cognitive.checklist.ui.TableModelChecklist"))
 			return "org.argouml.cognitive.checklist.ui.TabChecklist";
 
-		if (innerClass.contains("org.argouml.uml.diagram.collaboration.ui.FigMessageGroup"))
+		if (innerClass.equals("org.argouml.uml.diagram.collaboration.ui.FigMessageGroup"))
 			return "org.argouml.uml.diagram.collaboration.ui.FigAssociationRole";
 
-		if (innerClass.contains("org.argouml.util.TokenSep"))
+		if (innerClass.equals("org.argouml.util.TokenSep"))
 			return "org.argouml.util.MyTokenizer";
 
-		if (innerClass.contains("org.argouml.uml.ui.behavior.common_behavior.UMLLinkAssociationComboBoxModel")
-				|| innerClass.contains("org.argouml.uml.ui.behavior.common_behavior.ActionSetLinkAssociation"))
+		if (innerClass.equals("org.argouml.uml.ui.behavior.common_behavior.UMLLinkAssociationComboBoxModel")
+				|| innerClass.equals("org.argouml.uml.ui.behavior.common_behavior.ActionSetLinkAssociation"))
 			return "org.argouml.uml.ui.behavior.common_behavior.PropPanelLink";
 
-		if (innerClass.contains("org.argouml.cognitive.checklist.ui.TableModelChecklist"))
+		if (innerClass.equals("org.argouml.cognitive.checklist.ui.TableModelChecklist"))
 			return "org.argouml.cognitive.checklist.ui.TabChecklist";
 
-		if (innerClass.contains("org.argouml.uml.ui.foundation.core.UMLNodeDeployedComponentListModel"))
+		if (innerClass.equals("org.argouml.uml.ui.foundation.core.UMLNodeDeployedComponentListModel"))
 			return "org.argouml.uml.ui.foundation.core.PropPanelNode";
 		
-		if (innerClass.contains("org.argouml.model.mdr.Registry")) {
+		if (innerClass.equals("org.argouml.model.mdr.Registry")) {
 			return "org.argouml.model.mdr.ModelEventPumpMDRImpl";
 		}
 		

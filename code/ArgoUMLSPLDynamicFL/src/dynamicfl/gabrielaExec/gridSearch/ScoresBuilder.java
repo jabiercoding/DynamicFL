@@ -1,8 +1,7 @@
 package dynamicfl.gabrielaExec.gridSearch;
 
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +23,7 @@ public class ScoresBuilder {
 		}
 
 		public String toString(String delim) {
-			return this.algo + delim + this.threshold + delim + this.score + delim + this.value;
+			return algo + delim + threshold + delim + score + delim + value;
 		}
 	}
 
@@ -46,18 +45,17 @@ public class ScoresBuilder {
 		return scores;
 	}
 
-	public void toCSV(String path) {
+	public void toCSV(File file) {
 		try {
-			PrintWriter writer = new PrintWriter(path, "UTF-8");
+			PrintWriter writer = new PrintWriter(file, "UTF-8");
 			writer.println(header[0] + "," + header[1] + "," + header[2] + "," + header[3]);
 			for (Row row : rows) {
 				writer.println(row.toString(","));
 			}
 			writer.close();
-		} catch (FileNotFoundException | UnsupportedEncodingException e) {
-			System.out.println("Failed to create file " + path);
+		} catch (Exception  e) {
+			e.printStackTrace();
 		}
-
 	}
 
 }

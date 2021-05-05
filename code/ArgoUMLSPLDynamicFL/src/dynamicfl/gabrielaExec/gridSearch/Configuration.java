@@ -10,5 +10,10 @@ public class Configuration {
 		this.algo = algo;
 		this.threshold_sbfl = threshold_sbfl;
 	}
+	
+	@Override
+	public String toString() {
+		return algo.getName() + " " + Double.toString(threshold_sbfl);
+	}
 
 }

@@ -22,7 +22,7 @@ public class MainSpectrum {
 
 		try {
 
-			File output = new File("output/output_" + System.currentTimeMillis());
+			File mainOutput = new File("output/output_" + System.currentTimeMillis());
 
 			// read data set
 			Map<String, Map<String, List<Integer>>> featExec = GabrielaDatasetReader
@@ -33,7 +33,10 @@ public class MainSpectrum {
 			
 			ScoresBuilder scores = new ScoresBuilder();
 			// get sbl results
-			for (Configuration conf : new GridSearch()) {
+			GridSearch gridSearch = new GridSearch();
+			for (Configuration conf : gridSearch) {
+				File output = new File(mainOutput,conf.algo.getName() + "_" + conf.threshold_sbfl);
+				System.out.println("\n CURRENT SBL ALGO: " + conf);
 				Map<String, Map<String, List<Integer>>> results = SpectrumBasedLocalization.locate(featExec, conf.algo, conf.threshold_sbfl,
 					output);
 			
@@ -76,7 +79,7 @@ public class MainSpectrum {
 			}
 		
 		// Set the output file path
-		scores.toCSV("result.csv");
+		scores.toCSV(new File(mainOutput, "result.csv"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

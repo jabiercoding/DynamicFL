@@ -45,72 +45,74 @@ public class GridSearch implements Iterable<Configuration> {
 	List<AbstractSpectrumBasedFaultLocalizer<String>> algos;
 	List<Double> thresholds;
 	Queue<Configuration> configurations;
-	int num_trials = 50;
+	int num_trials = 4;
 
 	public GridSearch() {
-		this.initializeAlgorithms();
-		this.generateThresholds();
-		this.populateConfigurations();
+		initializeAlgorithms();
+		generateThresholds();
+		populateConfigurations();
 	}
 
 	private void initializeAlgorithms() {
-		this.algos = new ArrayList<>();
-		this.algos.add(new Ample<String>());
-		this.algos.add(new Anderberg<String>());
-		this.algos.add(new ArithmeticMean<String>());
-		this.algos.add(new Cohen<String>());
-		this.algos.add(new Dice<String>());
-		this.algos.add(new Euclid<String>());
-		this.algos.add(new Fleiss<String>());
-		this.algos.add(new GeometricMean<String>());
-		this.algos.add(new Goodman<String>());
-		this.algos.add(new Hamann<String>());
-		this.algos.add(new Hamming<String>());
-		this.algos.add(new HarmonicMean<String>());
-		this.algos.add(new Jaccard<String>());
-		this.algos.add(new Kulczynski1<String>());
-		this.algos.add(new Kulczynski2<String>());
-		this.algos.add(new M1<String>());
-		this.algos.add(new M2<String>());
-		this.algos.add(new Ochiai<String>());
-		this.algos.add(new Ochiai2<String>());
-		this.algos.add(new Overlap<String>());
-		this.algos.add(new RogersTanimoto<String>());
-		this.algos.add(new Rogot1<String>());
-		this.algos.add(new Rogot2<String>());
-		this.algos.add(new RussellRao<String>());
-		this.algos.add(new Scott<String>());
-		this.algos.add(new SimpleMatching<String>());
-		this.algos.add(new Sokal<String>());
-		this.algos.add(new SorensenDice<String>());
-		this.algos.add(new Tarantula<String>());
-		this.algos.add(new Wong1<String>());
-		this.algos.add(new Wong2<String>());
-		this.algos.add(new Wong3<String>());
-		this.algos.add(new Zoltar<String>());
+		algos = new ArrayList<>();
+//		algos.add(new Ample<String>());
+//		algos.add(new Anderberg<String>());
+//		algos.add(new ArithmeticMean<String>());
+//		algos.add(new Cohen<String>());
+//		algos.add(new Dice<String>());
+//		algos.add(new Euclid<String>());
+//		algos.add(new Fleiss<String>());
+//		algos.add(new GeometricMean<String>());
+//		algos.add(new Goodman<String>());
+//		algos.add(new Hamann<String>());
+//		algos.add(new Hamming<String>());
+//		algos.add(new HarmonicMean<String>());
+		algos.add(new Jaccard<String>());
+//		algos.add(new Kulczynski1<String>());
+//		algos.add(new Kulczynski2<String>());
+//		algos.add(new M1<String>());
+//		algos.add(new M2<String>());
+		algos.add(new Ochiai<String>());
+		algos.add(new Ochiai2<String>());
+//		algos.add(new Overlap<String>());
+//		algos.add(new RogersTanimoto<String>());
+//		algos.add(new Rogot1<String>());
+//		algos.add(new Rogot2<String>());
+//		algos.add(new RussellRao<String>());
+//		algos.add(new Scott<String>());
+//		algos.add(new SimpleMatching<String>());
+//		algos.add(new Sokal<String>());
+//		algos.add(new SorensenDice<String>());
+		algos.add(new Tarantula<String>());
+//		algos.add(new Wong1<String>());
+//		algos.add(new Wong2<String>());
+//		algos.add(new Wong3<String>());
+//		algos.add(new Zoltar<String>());
 
 	}
 
 	private void generateThresholds() {
-		this.thresholds = new ArrayList<>();
-		double step = (1.0 / this.num_trials);
-		for (int trial = 0; trial < this.num_trials; trial++) {
-			this.thresholds.add(trial * step);
+		thresholds = new ArrayList<>();
+		double step = (1.0 / num_trials);
+		for (int trial = 0; trial < num_trials; trial++) {
+			double threshold = trial * step;
+			// (1 - threshold) so we start with 1 and then we go descending
+			thresholds.add(1 - threshold);
 		}
 	}
 
 	private void populateConfigurations() {
-		this.configurations = new LinkedList<>();
-		for (AbstractSpectrumBasedFaultLocalizer<String> algo : this.algos) {
-			for (Double threshold_sbfl : this.thresholds) {
-				this.configurations.add(new Configuration(algo, threshold_sbfl));
+		configurations = new LinkedList<>();
+		for (AbstractSpectrumBasedFaultLocalizer<String> algo : algos) {
+			for (Double threshold_sbfl : thresholds) {
+				configurations.add(new Configuration(algo, threshold_sbfl));
 			}
 		}
 	}
 
 	@Override
 	public Iterator<Configuration> iterator() {
-		return this.configurations.iterator();
+		return configurations.iterator();
 	}
 
 }
