@@ -194,7 +194,8 @@ public class DynamicFL2BenchResults {
 				absPath = innerClassCase;
 			}
 
-			absPath = absPath.replaceAll("\\.", "\\\\");
+			//absPath = absPath.replaceAll("\\.", "/");
+			absPath = absPath.replace('.', File.separatorChar);
 			absPath = absPath + ".java";
 
 			File absFile = new File(originalArgoUMLsrc, absPath);
