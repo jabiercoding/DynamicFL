@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import groundTruthExtractor.GroundTruthExtractor;
 import utils.FeatureUtils;
 import utils.FileUtils;
 import utils.JDTUtils;
@@ -172,10 +173,23 @@ public class LineTraces2BenchFormat {
 	 */
 	private static boolean isFeatureMethod(String javaClass, MethodDeclaration method, String feature,
 			FeatureUtils fUtils) {
-		// TODO make it work for feature interactions "_and_"
-		List<String> containingF = fUtils.getConfigurationsContainingFeature(feature);
-		List<String> notContainingF = fUtils.getConfigurationsNotContainingFeature(feature);
-
+		// TODO Refactor, the beginning is the same as isFeatureClass
+		// Check if it is a feature interaction F1_and_F2
+		String[] features = feature.split(GroundTruthExtractor.AND_FEATURES);
+		// Get for the feature, or for the first feature
+		List<String> containingF = fUtils.getConfigurationsContainingFeature(features[0]);
+		List<String> notContainingF = fUtils.getConfigurationsNotContainingFeature(features[0]);
+		// in case of interaction, remove from containingF the configurations where the
+		// rest of the features did not appear
+		for (int i = 1; i < features.length; i++) {
+			List<String> notContainingCurrentF = fUtils.getConfigurationsNotContainingFeature(features[i]);
+			containingF.removeAll(notContainingCurrentF);
+			for (String notContained : notContainingCurrentF) {
+				if (!notContainingF.contains(notContained)) {
+					notContainingF.add(notContained);
+				}
+			}
+		}
 		String relativePathInScenario = javaClass.substring(javaClass.indexOf("src"), javaClass.length());
 
 		String originalId = TraceIdUtils.getId(method);
@@ -237,9 +251,23 @@ public class LineTraces2BenchFormat {
 	 * @return feature class
 	 */
 	private static boolean isFeatureClass(String javaClass, String feature, FeatureUtils fUtils) {
-		// TODO make it work for feature interactions "_and_"
-		List<String> containingF = fUtils.getConfigurationsContainingFeature(feature);
-		List<String> notContainingF = fUtils.getConfigurationsNotContainingFeature(feature);
+
+		// Check if it is a feature interaction F1_and_F2
+		String[] features = feature.split(GroundTruthExtractor.AND_FEATURES);
+		// Get for the feature, or for the first feature
+		List<String> containingF = fUtils.getConfigurationsContainingFeature(features[0]);
+		List<String> notContainingF = fUtils.getConfigurationsNotContainingFeature(features[0]);
+		// in case of interaction, remove from containingF the configurations where the
+		// rest of the features did not appear
+		for (int i = 1; i < features.length; i++) {
+			List<String> notContainingCurrentF = fUtils.getConfigurationsNotContainingFeature(features[i]);
+			containingF.removeAll(notContainingCurrentF);
+			for (String notContained : notContainingCurrentF) {
+				if (!notContainingF.contains(notContained)) {
+					notContainingF.add(notContained);
+				}
+			}
+		}
 
 		String relativePathInScenario = javaClass.substring(javaClass.indexOf("src"), javaClass.length());
 

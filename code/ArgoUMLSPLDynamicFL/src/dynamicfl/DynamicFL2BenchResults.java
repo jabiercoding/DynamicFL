@@ -243,7 +243,7 @@ public class DynamicFL2BenchResults {
 	 * @return null or the class containing the inner class
 	 */
 	public static String getCompilationUnitFromClass(String innerClass) {
-
+		// TODO ask Gabriela if we can change contains with equals or startsWith
 		if (innerClass.contains("org.argouml.uml.ui.behavior.state_machines.UMLCallEventOperationComboBox2")
 				|| innerClass.contains("org.argouml.uml.ui.behavior.state_machines.UMLCallEventOperationComboBoxModel"))
 			return "org.argouml.uml.ui.behavior.state_machines.PropPanelCallEvent";

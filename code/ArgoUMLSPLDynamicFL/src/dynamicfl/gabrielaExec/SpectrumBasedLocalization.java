@@ -11,6 +11,7 @@ import fk.stardust.localizer.IFaultLocalizer;
 import fk.stardust.localizer.Ranking;
 import fk.stardust.traces.INode;
 import fk.stardust.traces.ISpectra;
+import groundTruthExtractor.GroundTruthExtractor;
 
 public class SpectrumBasedLocalization {
 
@@ -112,7 +113,7 @@ public class SpectrumBasedLocalization {
 						}
 					}
 					if (!pairF1F2content.isEmpty()) {
-						expandedResult.put(feature + "_and_" + feature2, pairF1F2content);
+						expandedResult.put(feature + GroundTruthExtractor.AND_FEATURES + feature2, pairF1F2content);
 					}
 				}
 			}
