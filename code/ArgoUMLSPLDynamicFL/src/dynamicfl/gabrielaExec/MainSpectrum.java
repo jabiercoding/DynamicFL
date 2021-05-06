@@ -55,7 +55,7 @@ public class MainSpectrum {
 
 				// compute metrics
 				// scenario, feature, (precision, recall, f1, classPrecision, classRecall,
-				// classF1)
+				// classF1, methodPrecision, methodRecall, methodF1)
 				Map<String, Map<String, List<Double>>> result = DynamicFL2BenchResults.compute(
 						PATH_ARGOUMLSPL_BENCHMARK, PATH_METHOD_LEVEL_GROUND_TRUTH, results, output,
 						ONLY_ORIGINAL_SCENARIO);

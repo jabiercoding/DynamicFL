@@ -106,20 +106,33 @@ public class DynamicFL2BenchResults {
 					List<String> results = LineTraces2BenchFormat.getResultsInBenchmarkFormat(absPathAndLines,
 							currentFeature, fUtils, true);
 
-					List<String> resultsMethodLevel = LineTraces2MethodComparison
-							.getResultsInMethodComparison(absPathAndLines, currentFeature, fUtils, true);
-
-					// Save to file
-
+					// Save to file benchmarkFormat results
 					StringBuffer buffer = new StringBuffer();
 					for (String trace : results) {
 						buffer.append(trace);
 						buffer.append("\n");
 					}
-
 					File outputScenarioFeature = new File(outputScenario, currentFeature + ".txt");
 					try {
 						FileUtils.writeFile(outputScenarioFeature, buffer.toString());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
+					List<String> resultsMethodLevel = LineTraces2MethodComparison
+							.getResultsInMethodComparison(absPathAndLines, currentFeature, fUtils, true);
+
+					// Save to file method-level results
+					StringBuffer buffer2 = new StringBuffer();
+					for (String trace : resultsMethodLevel) {
+						buffer2.append(trace);
+						buffer2.append("\n");
+					}
+					File outputScenarioMethod = new File(output, scenario.getName() + "_method");
+					outputScenarioMethod.mkdirs();
+					File outputScenarioFeature2 = new File(outputScenarioMethod, currentFeature + ".txt");
+					try {
+						FileUtils.writeFile(outputScenarioFeature2, buffer2.toString());
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

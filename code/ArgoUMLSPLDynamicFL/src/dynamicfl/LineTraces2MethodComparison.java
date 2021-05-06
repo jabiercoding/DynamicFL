@@ -86,14 +86,8 @@ public class LineTraces2MethodComparison {
 		else
 			featureFile = feature.substring(0, 1).toUpperCase() + feature.substring(1).toLowerCase() + ".txt";
 		featureFile = featureFile.replace("diagram", "");
-		Path path = Paths.get(pathToMethodLevelGroundTruth);
-		List<String> GTMethods = null;
-		try {
-			GTMethods = Files.readAllLines(path.resolve(featureFile));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+		File path = new File(pathToMethodLevelGroundTruth, featureFile);
+		List<String> GTMethods = FileUtils.getLinesOfFile(path);
 		return GTMethods;
 	}
 
