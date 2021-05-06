@@ -13,11 +13,18 @@ import dynamicfl.gabrielaExec.gridSearch.ScoresBuilder;
 public class MainSpectrum {
 
 	// Dataset from https://zenodo.org/record/4262529
-	final static String PATH_DATASET_EXECUTIONS = "C:\\Users\\gabil\\Downloads\\dataset\\dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\variants";
+	// C:/Users/106836/Downloads/Dataset/Dataset/ArgoUML/VariantsSourceCodeComparison/manual/variants
+	// C:\\Users\\gabil\\Downloads\\dataset\\dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\variants
+	final static String PATH_DATASET_EXECUTIONS = "C:/Users/106836/Downloads/Dataset/Dataset/ArgoUML/VariantsSourceCodeComparison/manual/variants";
 
-	final static String PATH_METHOD_LEVEL_GROUND_TRUTH = "C:\\Users\\gabil\\Downloads\\dataset\\dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\results\\MethodComparison\\groundTruthMethods";
+	// C:\Users\106836\Downloads\Dataset\Dataset\ArgoUML\VariantsSourceCodeComparison\manual\results\MethodComparison\groundTruthMethods
+	// C:\\Users\\gabil\\Downloads\\dataset\\dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\results\\MethodComparison\\groundTruthMethods
+	final static String PATH_METHOD_LEVEL_GROUND_TRUTH = "C:\\Users\\106836\\Downloads\\Dataset\\Dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\results\\MethodComparison\\groundTruthMethods";
 
-	final static String PATH_ARGOUMLSPL_BENCHMARK = "C:\\Users\\gabil\\eclipse-workspace\\ArgoUMLSPLBenchmark";
+	// https://github.com/but4reuse/argouml-spl-benchmark
+	// C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark
+	// C:\\Users\\gabil\\eclipse-workspace\\ArgoUMLSPLBenchmark
+	final static String PATH_ARGOUMLSPL_BENCHMARK = "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark";
 
 	final static boolean ONLY_ORIGINAL_SCENARIO = true;
 
