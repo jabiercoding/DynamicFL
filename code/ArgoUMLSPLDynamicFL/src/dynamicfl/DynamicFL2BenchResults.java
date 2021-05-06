@@ -18,13 +18,14 @@ public class DynamicFL2BenchResults {
 	/**
 	 * Compute results
 	 * 
-	 * @param pathToArgoUMLSPLBenchmark e.g.,
-	 *                                  "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark"
+	 * @param pathToArgoUMLSPLBenchmark
+	 *            e.g., "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark"
 	 * @return map of scenario, feature, (precision, recall, f1, classPrecision,
 	 *         classRecall, classF1)
 	 */
 	public static Map<String, Map<String, List<Double>>> compute(String pathToArgoUMLSPLBenchmark,
-			Map<String, Map<String, List<Integer>>> featureClassAndLines, File output, boolean onlyScenarioOriginal) {
+			String pathToMethodLevelGroundTruth, Map<String, Map<String, List<Integer>>> featureClassAndLines,
+			File output, boolean onlyScenarioOriginal) {
 
 		Map<String, Map<String, List<Double>>> result = new LinkedHashMap<String, Map<String, List<Double>>>();
 
@@ -96,6 +97,9 @@ public class DynamicFL2BenchResults {
 
 					List<String> results = LineTraces2BenchFormat.getResultsInBenchmarkFormat(absPathAndLines,
 							currentFeature, fUtils, true);
+					
+					List<String> resultsMethodLevel = LineTraces2MethodComparison.getResultsInMethodComparison(absPathAndLines,
+							currentFeature, fUtils, true);
 
 					// Save to file
 
@@ -141,6 +145,18 @@ public class DynamicFL2BenchResults {
 						resultFeature.add(precision2);
 						resultFeature.add(recall2);
 						resultFeature.add(f12);
+						
+						System.out.println("\nMethod level metrics");
+						List<String> groundTruth3 = LineTraces2MethodComparison.readMethodsGroundTruth(pathToMethodLevelGroundTruth, currentFeature);
+						double precision3 = MetricsCalculation.getPrecision(groundTruth3, resultsMethodLevel);
+						double recall3 = MetricsCalculation.getRecall(groundTruth3, resultsMethodLevel);
+						double f13 = MetricsCalculation.getF1(precision3, recall3);
+						System.out.println("Precision: " + precision3);
+						System.out.println("Recall: " + recall3);
+						System.out.println("F1: " + f13);
+						resultFeature.add(precision3);
+						resultFeature.add(recall3);
+						resultFeature.add(f13);
 					}
 				}
 			}
@@ -283,12 +299,10 @@ public class DynamicFL2BenchResults {
 
 		if (innerClass.equals("org.argouml.uml.ui.foundation.core.UMLNodeDeployedComponentListModel"))
 			return "org.argouml.uml.ui.foundation.core.PropPanelNode";
-		
+
 		if (innerClass.equals("org.argouml.model.mdr.Registry")) {
 			return "org.argouml.model.mdr.ModelEventPumpMDRImpl";
 		}
-		
-		
 
 		return null;
 	}
