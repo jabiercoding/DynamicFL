@@ -54,7 +54,7 @@ public class LineTraces2MethodComparison {
 	public static List<String> getResultsInMethodComparison(Map<String, List<Integer>> classAbsPathAndLines,
 			String feature, FeatureUtils fUtils, boolean crossVariantsCheck) {
 
-		List<String> results = new ArrayList<String>();
+		//List<String> results = new ArrayList<String>();
 		List<MethodDeclaration> methodsFeature = new ArrayList<MethodDeclaration>();
 		List<String> resultsmethods = new ArrayList<String>();
 
@@ -123,7 +123,7 @@ public class LineTraces2MethodComparison {
 			if (per >= THRESHOLD_GLOBAL_CLASS_LINES_PERCENTAGE) {
 				// all methods of a class are considered part of the feature
 				methodsFeature.addAll(getMethods(cu));
-				results.add(TraceIdUtils.getId((TypeDeclaration) cu.types().get(0)));
+				//results.add(TraceIdUtils.getId((TypeDeclaration) cu.types().get(0)));
 				continue;
 			}
 
@@ -135,7 +135,7 @@ public class LineTraces2MethodComparison {
 				if (perc >= THRESHOLD_METHODS_PERCENTAGE) {
 					// all methods of a class are considered part of the feature
 					methodsFeature.addAll(getMethods(cu));
-					results.add(TraceIdUtils.getId((TypeDeclaration) cu.types().get(0)));
+					//results.add(TraceIdUtils.getId((TypeDeclaration) cu.types().get(0)));
 					continue;
 				}
 			}
@@ -159,16 +159,16 @@ public class LineTraces2MethodComparison {
 				if (percentage >= THRESHOLD_METHOD_LINES_PERCENTAGE) {
 					// add method as part of the feature
 					methodsFeature.add(method);
-					results.add(TraceIdUtils.getId(method));
+					//results.add(TraceIdUtils.getId(method));
 				} else {
 					// add method as part of the feature
 					methodsFeature.add(method);
-					results.add(TraceIdUtils.getId(method) + " Refinement");
+					//results.add(TraceIdUtils.getId(method) + " Refinement");
 				}
 			}
 
 			for (TypeDeclaration type : typeAndLocatedLines.keySet()) {
-				results.add(TraceIdUtils.getId(type) + " Refinement");
+				//results.add(TraceIdUtils.getId(type) + " Refinement");
 			}
 		}
 
