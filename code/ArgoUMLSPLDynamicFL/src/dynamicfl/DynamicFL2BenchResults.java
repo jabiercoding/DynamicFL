@@ -9,17 +9,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+
 import metricsCalculation.MetricsCalculation;
 import utils.FeatureUtils;
 import utils.FileUtils;
 
 public class DynamicFL2BenchResults {
 
+	static Map<String, String> CACHE_TYPE_ABSPATH = new HashMap<String, String>();
+
 	/**
 	 * Compute results
 	 * 
-	 * @param pathToArgoUMLSPLBenchmark
-	 *            e.g., "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark"
+	 * @param pathToArgoUMLSPLBenchmark e.g.,
+	 *                                  "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark"
 	 * @return map of scenario, feature, (precision, recall, f1, classPrecision,
 	 *         classRecall, classF1)
 	 */
@@ -97,9 +105,9 @@ public class DynamicFL2BenchResults {
 
 					List<String> results = LineTraces2BenchFormat.getResultsInBenchmarkFormat(absPathAndLines,
 							currentFeature, fUtils, true);
-					
-					List<String> resultsMethodLevel = LineTraces2MethodComparison.getResultsInMethodComparison(absPathAndLines,
-							currentFeature, fUtils, true);
+
+					List<String> resultsMethodLevel = LineTraces2MethodComparison
+							.getResultsInMethodComparison(absPathAndLines, currentFeature, fUtils, true);
 
 					// Save to file
 
@@ -145,9 +153,10 @@ public class DynamicFL2BenchResults {
 						resultFeature.add(precision2);
 						resultFeature.add(recall2);
 						resultFeature.add(f12);
-						
+
 						System.out.println("\nMethod level metrics");
-						List<String> groundTruth3 = LineTraces2MethodComparison.readMethodsGroundTruth(pathToMethodLevelGroundTruth, currentFeature);
+						List<String> groundTruth3 = LineTraces2MethodComparison
+								.readMethodsGroundTruth(pathToMethodLevelGroundTruth, currentFeature);
 						double precision3 = MetricsCalculation.getPrecision(groundTruth3, resultsMethodLevel);
 						double recall3 = MetricsCalculation.getRecall(groundTruth3, resultsMethodLevel);
 						double f13 = MetricsCalculation.getF1(precision3, recall3);
@@ -173,18 +182,18 @@ public class DynamicFL2BenchResults {
 	 */
 	public static void resultsToFile(Map<String, Map<String, List<Double>>> result, File output) {
 		try {
-			FileUtils.writeFile(output, "Scenario;Feature;Precision;Recall;F1;ClassPrecision;ClassRecall;ClassF1;MethodPrecision;MethodRecall;MethodF1\n");
+			FileUtils.writeFile(output,
+					"Scenario;Feature;Precision;Recall;F1;ClassPrecision;ClassRecall;ClassF1;MethodPrecision;MethodRecall;MethodF1\n");
 			for (String scenario : result.keySet()) {
 				Map<String, List<Double>> scenarioFeatures = result.get(scenario);
 				for (String feature : scenarioFeatures.keySet()) {
 					List<Double> metrics = scenarioFeatures.get(feature);
 					if (metrics != null && !metrics.isEmpty()) {
 						String metricValues = "";
-						for(Double v : metrics) {
+						for (Double v : metrics) {
 							metricValues = metricValues + ";" + v;
 						}
-						FileUtils.appendToFile(output,
-								scenario + ";" + feature + metricValues);
+						FileUtils.appendToFile(output, scenario + ";" + feature + metricValues);
 					}
 				}
 			}
@@ -203,33 +212,23 @@ public class DynamicFL2BenchResults {
 	private static Map<String, List<Integer>> transformToAbsPathAndLines(String currentFeature, File originalArgoUMLsrc,
 			Map<String, List<Integer>> classAndLines) {
 		Map<String, List<Integer>> result = new LinkedHashMap<String, List<Integer>>();
-		for (String key : classAndLines.keySet()) {
+		for (String currentClass : classAndLines.keySet()) {
 
 			// check of innerclasses
-			String absPath = key + "";
-			String innerClassCase = getCompilationUnitFromClass(key);
-			if (innerClassCase != null) {
-				absPath = innerClassCase;
-			}
-
-			// absPath = absPath.replaceAll("\\.", "/");
-			absPath = absPath.replace('.', File.separatorChar);
-			absPath = absPath + ".java";
-
-			File absFile = new File(originalArgoUMLsrc, absPath);
-			// Filter files which are not part of the originalArgoUMLsrc (libraries etc.)
-			if (!absFile.exists()) {
-				System.err.println(absFile.getAbsolutePath() + " does not exist");
+			String absPath = getAbsPathFromClass(originalArgoUMLsrc, currentClass);
+			if (absPath == null) {
+				// it does not exist
+				System.err.println(currentClass + " does not exist");
 				continue;
 			}
 
 			// in case of same files (i.e., inner classes)
-			List<Integer> current = classAndLines.get(key);
-			List<Integer> previous = result.get(absFile.getAbsolutePath());
+			List<Integer> current = classAndLines.get(currentClass);
+			List<Integer> previous = result.get(absPath);
 			if (previous != null) {
 				current.addAll(previous);
 			}
-			result.put(absFile.getAbsolutePath(), current);
+			result.put(absPath, current);
 		}
 		return result;
 	}
@@ -254,58 +253,45 @@ public class DynamicFL2BenchResults {
 	}
 
 	/**
-	 * Replace the name of the Inner Class by the Class name of the file where the
-	 * Inner Class is contained
+	 * Get absolute path from a class, sometimes a file (compilation unit) has more
+	 * than one type (class)
 	 * 
-	 * @param potentialInnerClass
-	 * @return null or the class containing the inner class
+	 * @param originalArgoUMLsrc
+	 * 
+	 * @param targetClass
+	 * @return null or the absolute path of the file containing the class
 	 */
-	public static String getCompilationUnitFromClass(String innerClass) {
-		// TODO ask Gabriela if we can change contains with equals or startsWith
-		if (innerClass.equals("org.argouml.uml.ui.behavior.state_machines.UMLCallEventOperationComboBox2")
-				|| innerClass.equals("org.argouml.uml.ui.behavior.state_machines.UMLCallEventOperationComboBoxModel"))
-			return "org.argouml.uml.ui.behavior.state_machines.PropPanelCallEvent";
+	public static String getAbsPathFromClass(File originalArgoUMLsrc, String targetClass) {
+		String absPath = targetClass.replace('.', File.separatorChar);
+		absPath = absPath + ".java";
 
-		if (innerClass.equals("org.argouml.uml.ui.behavior.common_behavior.ActionCreateArgument"))
-			return "org.argouml.uml.ui.behavior.common_behavior.PropPanelAction";
-
-		if (innerClass.equals("org.argouml.uml.ui.behavior.common_behavior.UMLActionSequenceActionListModel")
-				|| innerClass.equals("org.argouml.uml.ui.behavior.common_behavior.UMLActionSequenceActionList"))
-			return "org.argouml.uml.ui.behavior.common_behavior.PropPanelActionSequence";
-
-		if (innerClass.equals("org.argouml.uml.ui.behavior.activity_graphs.UMLPartitionActivityGraphListModel")
-				|| innerClass.equals("org.argouml.uml.ui.behavior.activity_graphs.UMLPartitionContentListModel"))
-			return "org.argouml.uml.ui.behavior.activity_graphs.PropPanelPartition";
-
-		if (innerClass.equals("org.argouml.uml.diagram.ui.FigAssociationEndAnnotation")
-				|| innerClass.equals("org.argouml.uml.diagram.ui.FigOrdering")
-				|| innerClass.equals("org.argouml.uml.diagram.ui.FigRole")
-				|| innerClass.equals("org.argouml.uml.diagram.ui.FigMultiplicity"))
-			return "org.argouml.uml.diagram.ui.FigAssociation";
-
-		if (innerClass.equals("org.argouml.cognitive.checklist.ui.TableModelChecklist"))
-			return "org.argouml.cognitive.checklist.ui.TabChecklist";
-
-		if (innerClass.equals("org.argouml.uml.diagram.collaboration.ui.FigMessageGroup"))
-			return "org.argouml.uml.diagram.collaboration.ui.FigAssociationRole";
-
-		if (innerClass.equals("org.argouml.util.TokenSep"))
-			return "org.argouml.util.MyTokenizer";
-
-		if (innerClass.equals("org.argouml.uml.ui.behavior.common_behavior.UMLLinkAssociationComboBoxModel")
-				|| innerClass.equals("org.argouml.uml.ui.behavior.common_behavior.ActionSetLinkAssociation"))
-			return "org.argouml.uml.ui.behavior.common_behavior.PropPanelLink";
-
-		if (innerClass.equals("org.argouml.cognitive.checklist.ui.TableModelChecklist"))
-			return "org.argouml.cognitive.checklist.ui.TabChecklist";
-
-		if (innerClass.equals("org.argouml.uml.ui.foundation.core.UMLNodeDeployedComponentListModel"))
-			return "org.argouml.uml.ui.foundation.core.PropPanelNode";
-
-		if (innerClass.equals("org.argouml.model.mdr.Registry")) {
-			return "org.argouml.model.mdr.ModelEventPumpMDRImpl";
+		File absFile = new File(originalArgoUMLsrc, absPath);
+		if (absFile.exists()) {
+			return absFile.getAbsolutePath();
 		}
 
+		// not found, check for inner classes in sibling classes
+		// but check first in the cache
+		String inCache = CACHE_TYPE_ABSPATH.get(targetClass);
+		if (inCache != null) {
+			return inCache;
+		}
+
+		for (File f : absFile.getParentFile().listFiles()) {
+			if (!f.getName().endsWith(".java")) {
+				continue;
+			}
+			String name = targetClass.substring(targetClass.lastIndexOf(".") + 1, targetClass.length());
+			List<TypeDeclaration> types = getTypes(f);
+			for (TypeDeclaration type : types) {
+				String typeName = type.getName().toString();
+				if (name.equals(typeName)) {
+					// found
+					CACHE_TYPE_ABSPATH.put(targetClass, f.getAbsolutePath());
+					return f.getAbsolutePath();
+				}
+			}
+		}
 		return null;
 	}
 
@@ -337,6 +323,31 @@ public class DynamicFL2BenchResults {
 			}
 		}
 		return avg / numFeat;
+	}
+
+	/**
+	 * Get all types
+	 * 
+	 * @param a java file
+	 * @return list of types, that can be more than one
+	 */
+	public static List<TypeDeclaration> getTypes(File f) {
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setBindingsRecovery(true);
+
+		String source = FileUtils.getStringOfFile(f);
+		parser.setSource(source.toCharArray());
+
+		CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+		List<TypeDeclaration> types = new ArrayList<TypeDeclaration>();
+		cu.accept(new ASTVisitor() {
+			public boolean visit(TypeDeclaration node) {
+				types.add(node);
+				return true;
+			}
+		});
+		return types;
 	}
 
 }
