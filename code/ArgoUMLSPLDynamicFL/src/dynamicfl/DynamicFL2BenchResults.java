@@ -173,16 +173,18 @@ public class DynamicFL2BenchResults {
 	 */
 	public static void resultsToFile(Map<String, Map<String, List<Double>>> result, File output) {
 		try {
-			FileUtils.writeFile(output, "Scenario;Feature;Precision;Recall;F1;ClassPrecision;ClassRecall;ClassF1\n");
+			FileUtils.writeFile(output, "Scenario;Feature;Precision;Recall;F1;ClassPrecision;ClassRecall;ClassF1;MethodPrecision;MethodRecall;MethodF1\n");
 			for (String scenario : result.keySet()) {
 				Map<String, List<Double>> scenarioFeatures = result.get(scenario);
 				for (String feature : scenarioFeatures.keySet()) {
 					List<Double> metrics = scenarioFeatures.get(feature);
 					if (metrics != null && !metrics.isEmpty()) {
+						String metricValues = "";
+						for(Double v : metrics) {
+							metricValues = metricValues + ";" + v;
+						}
 						FileUtils.appendToFile(output,
-								scenario + ";" + feature + ";" + metrics.get(0) + ";" + metrics.get(1) + ";"
-										+ metrics.get(2) + ";" + metrics.get(3) + ";" + metrics.get(4) + ";"
-										+ metrics.get(5));
+								scenario + ";" + feature + metricValues);
 					}
 				}
 			}
