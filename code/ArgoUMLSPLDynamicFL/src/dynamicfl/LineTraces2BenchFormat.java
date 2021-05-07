@@ -217,7 +217,7 @@ public class LineTraces2BenchFormat {
 				String source = FileUtils.getStringOfFile(java);
 				parser.setSource(source.toCharArray());
 				CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-				for (MethodDeclaration m : getMethods(cu)) {
+				for (MethodDeclaration m : getMethods(cu, javaClass)) {
 					String variantId = TraceIdUtils.getId(m);
 					if (originalId.equals(variantId)) {
 						return false;
@@ -238,7 +238,7 @@ public class LineTraces2BenchFormat {
 				parser.setSource(source.toCharArray());
 				CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 				boolean found = false;
-				for (MethodDeclaration m : getMethods(cu)) {
+				for (MethodDeclaration m : getMethods(cu, javaClass)) {
 					String variantId = TraceIdUtils.getId(m);
 					if (originalId.equals(variantId)) {
 						found = true;
@@ -287,7 +287,7 @@ public class LineTraces2BenchFormat {
 		for (String config : notContainingF) {
 			File variantFolder = fUtils.getVariantFolderOfConfig(config);
 			File java = new File(variantFolder, relativePathInScenario);
-			if (java.exists()) { // TODO && isTypeInJava(type,java)
+			if (java.exists() && isTypeInJava(javaClass, java)) {
 				return false;
 			}
 		}
@@ -296,11 +296,30 @@ public class LineTraces2BenchFormat {
 		for (String config : containingF) {
 			File variantFolder = fUtils.getVariantFolderOfConfig(config);
 			File java = new File(variantFolder, relativePathInScenario);
-			if (!java.exists()) { // TODO || !isTypeInJava(type,java)
+			if (!java.exists() || !isTypeInJava(javaClass, java)) {
 				return false;
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Is type in Java file
+	 * 
+	 * @param javaClass
+	 * @param java      file
+	 * @return true if the java file contains this type declaration
+	 */
+	public static boolean isTypeInJava(String javaClass, File java) {
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setBindingsRecovery(true);
+
+		String source = FileUtils.getStringOfFile(java);
+		parser.setSource(source.toCharArray());
+		CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+		TypeDeclaration type = getTypeDeclarationByName(cu, javaClass);
+		return type != null;
 	}
 
 	/**
