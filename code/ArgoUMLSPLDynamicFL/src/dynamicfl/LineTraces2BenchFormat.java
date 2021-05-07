@@ -48,18 +48,26 @@ public class LineTraces2BenchFormat {
 	 * 
 	 * @param classAndLines. Key set is the absolute path to each Java file
 	 */
-	public static List<String> getResultsInBenchmarkFormat(Map<String, List<Integer>> classAbsPathAndLines,
-			String feature, FeatureUtils fUtils, boolean crossVariantsCheck) {
+	public static List<String> getResultsInBenchmarkFormat(Map<String, List<Integer>> classAndLines, String feature,
+			FeatureUtils fUtils, File originalArgoUMLsrc, boolean crossVariantsCheck) {
 
 		List<String> results = new ArrayList<String>();
 
 		// for each Java file
-		for (String javaClass : classAbsPathAndLines.keySet()) {
+		for (String javaClass : classAndLines.keySet()) {
+
+			if (!javaClass.startsWith("org.argouml")) {
+				// skip org.omg.* as they are not part of the benchmark
+				// groundTruthExtractor.GroundTruthExtractor.getAllArgoUMLSPLRelevantJavaFiles(File)
+				continue;
+			}
+
+			String javaAbsPath = DynamicFL2BenchResults.getAbsPathFromClass(originalArgoUMLsrc, javaClass);
 
 			if (crossVariantsCheck) {
 				// Class is in all variants with F and it is not present in any variant without
 				// F
-				boolean isFeatureClass = isFeatureClass(javaClass, feature, fUtils);
+				boolean isFeatureClass = isFeatureClass(javaClass, javaAbsPath, feature, fUtils);
 				if (!isFeatureClass) {
 					// It cannot be related to this feature, discard class
 					continue;
@@ -76,18 +84,22 @@ public class LineTraces2BenchFormat {
 			parser.setKind(ASTParser.K_COMPILATION_UNIT);
 			parser.setBindingsRecovery(true);
 
-			String source = FileUtils.getStringOfFile(new File(javaClass));
+			String source = FileUtils.getStringOfFile(new File(javaAbsPath));
 			parser.setSource(source.toCharArray());
 			CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-			List<MethodDeclaration> methods = getMethods(cu);
-			List<Integer> lines = classAbsPathAndLines.get(javaClass);
+
+			TypeDeclaration type = getTypeDeclarationByName(cu, javaClass);
+
+			// get the methods of this class, if we take all methods from the compilation
+			// unit we might be getting more (more than one class in one Java file)
+			List<MethodDeclaration> methods = getMethods(cu, javaClass);
+			List<Integer> lines = classAndLines.get(javaClass);
 			for (int line : lines) {
 				int position = cu.getPosition(line, 0);
 				// TODO check if position inside anonymous classes can be anonymous classes
 				// inside a "real" method
 				MethodDeclaration method = JDTUtils.getMethodThatContainsAPosition(methods, position, position);
 				if (method == null) {
-					TypeDeclaration type = (TypeDeclaration) cu.types().get(0);
 					Integer total = typeAndLocatedLines.get(type);
 					if (total == null) {
 						total = 0;
@@ -105,7 +117,7 @@ public class LineTraces2BenchFormat {
 			}
 
 			// global LoC class level
-			int classLoC = getNumberOfLoC(cu.toString());
+			int classLoC = getNumberOfLoC(type.toString());
 			int fLoC = 0;
 			for (Integer l : methodAndLocatedLines.values()) {
 				fLoC += l;
@@ -115,7 +127,7 @@ public class LineTraces2BenchFormat {
 			}
 			double per = (double) fLoC / (double) classLoC;
 			if (per >= THRESHOLD_GLOBAL_CLASS_LINES_PERCENTAGE) {
-				results.add(TraceIdUtils.getId((TypeDeclaration) cu.types().get(0)));
+				results.add(TraceIdUtils.getId(type));
 				continue;
 			}
 
@@ -125,7 +137,7 @@ public class LineTraces2BenchFormat {
 				int fNMethods = methodAndLocatedLines.keySet().size();
 				double perc = (double) fNMethods / (double) classNMethods;
 				if (perc >= THRESHOLD_METHODS_PERCENTAGE) {
-					results.add(TraceIdUtils.getId((TypeDeclaration) cu.types().get(0)));
+					results.add(TraceIdUtils.getId(type));
 					continue;
 				}
 			}
@@ -136,7 +148,7 @@ public class LineTraces2BenchFormat {
 
 				if (crossVariantsCheck) {
 					// Is feature method
-					boolean isFeatureMethod = isFeatureMethod(javaClass, method, feature, fUtils);
+					boolean isFeatureMethod = isFeatureMethod(javaClass, javaAbsPath, method, feature, fUtils);
 					if (!isFeatureMethod) {
 						continue;
 					}
@@ -153,8 +165,8 @@ public class LineTraces2BenchFormat {
 				}
 			}
 
-			for (TypeDeclaration type : typeAndLocatedLines.keySet()) {
-				results.add(TraceIdUtils.getId(type) + " Refinement");
+			for (TypeDeclaration ctype : typeAndLocatedLines.keySet()) {
+				results.add(TraceIdUtils.getId(ctype) + " Refinement");
 			}
 		}
 
@@ -171,8 +183,8 @@ public class LineTraces2BenchFormat {
 	 * @param fUtils
 	 * @return
 	 */
-	private static boolean isFeatureMethod(String javaClass, MethodDeclaration method, String feature,
-			FeatureUtils fUtils) {
+	private static boolean isFeatureMethod(String javaClass, String javaAbsPath, MethodDeclaration method,
+			String feature, FeatureUtils fUtils) {
 		// TODO Refactor, the beginning is the same as isFeatureClass
 		// Check if it is a feature interaction F1_and_F2
 		String[] features = feature.split(GroundTruthExtractor.AND_FEATURES);
@@ -190,7 +202,7 @@ public class LineTraces2BenchFormat {
 				}
 			}
 		}
-		String relativePathInScenario = javaClass.substring(javaClass.indexOf("src"), javaClass.length());
+		String relativePathInScenario = javaAbsPath.substring(javaAbsPath.indexOf("src"), javaAbsPath.length());
 
 		String originalId = TraceIdUtils.getId(method);
 
@@ -250,7 +262,7 @@ public class LineTraces2BenchFormat {
 	 * @param fUtils
 	 * @return feature class
 	 */
-	private static boolean isFeatureClass(String javaClass, String feature, FeatureUtils fUtils) {
+	private static boolean isFeatureClass(String javaClass, String absPathClass, String feature, FeatureUtils fUtils) {
 
 		// Check if it is a feature interaction F1_and_F2
 		String[] features = feature.split(GroundTruthExtractor.AND_FEATURES);
@@ -269,13 +281,13 @@ public class LineTraces2BenchFormat {
 			}
 		}
 
-		String relativePathInScenario = javaClass.substring(javaClass.indexOf("src"), javaClass.length());
+		String relativePathInScenario = absPathClass.substring(absPathClass.indexOf("src"), absPathClass.length());
 
 		// Must not appear in variants without the feature
 		for (String config : notContainingF) {
 			File variantFolder = fUtils.getVariantFolderOfConfig(config);
 			File java = new File(variantFolder, relativePathInScenario);
-			if (java.exists()) {
+			if (java.exists()) { // TODO && isTypeInJava(type,java)
 				return false;
 			}
 		}
@@ -284,7 +296,7 @@ public class LineTraces2BenchFormat {
 		for (String config : containingF) {
 			File variantFolder = fUtils.getVariantFolderOfConfig(config);
 			File java = new File(variantFolder, relativePathInScenario);
-			if (!java.exists()) {
+			if (!java.exists()) { // TODO || !isTypeInJava(type,java)
 				return false;
 			}
 		}
@@ -328,6 +340,50 @@ public class LineTraces2BenchFormat {
 		}
 		methods.removeAll(toRemove);
 		return methods;
+	}
+
+	/**
+	 * Get methods of a given type
+	 * 
+	 * @param compilation unit
+	 * @return name of the target type declaration
+	 */
+	public static List<MethodDeclaration> getMethods(CompilationUnit cu, String type) {
+		List<MethodDeclaration> methods = new ArrayList<MethodDeclaration>();
+		TypeDeclaration t = getTypeDeclarationByName(cu, type);
+		if (t != null) {
+			MethodDeclaration[] ms = t.getMethods();
+			if (ms != null) {
+				for (MethodDeclaration m : ms) {
+					methods.add(m);
+				}
+			}
+		} else {
+			System.err.println(type + " type does not exist in compilation unit");
+		}
+		return methods;
+	}
+
+	/**
+	 * Get typeDeclaration by name (one compilation unit usually has one type but it
+	 * can have more)
+	 * 
+	 * @param compilation unit
+	 * @param name
+	 * @return the typeDeclaration or null if not found
+	 */
+	public static TypeDeclaration getTypeDeclarationByName(CompilationUnit cu, String javaClass) {
+		for (Object o : cu.types()) {
+			if (o instanceof TypeDeclaration) {
+				TypeDeclaration t = (TypeDeclaration) o;
+				String name = t.getName().getFullyQualifiedName();
+				// fully qualified name it returns the name, not the package.class etc.
+				if (javaClass.endsWith("." + name)) {
+					return t;
+				}
+			}
+		}
+		return null;
 	}
 
 }

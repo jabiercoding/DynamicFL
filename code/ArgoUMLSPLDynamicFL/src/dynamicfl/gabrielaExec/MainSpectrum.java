@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import dynamicfl.DynamicFL2BenchResults;
-
 import dynamicfl.gabrielaExec.gridSearch.Configuration;
 import dynamicfl.gabrielaExec.gridSearch.GridSearch;
 import dynamicfl.gabrielaExec.gridSearch.ScoresBuilder;
@@ -28,6 +27,13 @@ public class MainSpectrum {
 
 	final static boolean ONLY_ORIGINAL_SCENARIO = true;
 
+	// e.g., michelon et al. 2021 execution dataset and groundtruth contains
+	// "org.omg" source code but they are not considered by the benchmark
+	// see GroundTruthExtractor.getAllArgoUMLSPLRelevantJavaFiles
+	// Use IGNORE=false for a fair comparison with Michelon et al. 2021 and false
+	// otherwise
+	final static boolean IGNORE_NOT_ARGOUML_TRACES = false;
+
 	public static void main(String[] args) {
 
 		try {
@@ -36,7 +42,7 @@ public class MainSpectrum {
 
 			// read data set
 			Map<String, Map<String, List<Integer>>> featExec = GabrielaDatasetReader
-					.getFeatExec(PATH_DATASET_EXECUTIONS);
+					.getFeatExec(PATH_DATASET_EXECUTIONS, IGNORE_NOT_ARGOUML_TRACES);
 
 			long start = System.currentTimeMillis();
 
@@ -78,7 +84,7 @@ public class MainSpectrum {
 				System.out.println("2021 Recall:\t0.318333333");
 				System.out.println("2021 F1:\t0.105");
 
-				// Results from 2020 solution
+				// Results from 2021 solution
 				// ActivityDiagram 0.05 0.24 0.08
 				// CollaborationDiagram 0.04 0.19 0.06
 				// DeploymentDiagram 0.04 0.45 0.07

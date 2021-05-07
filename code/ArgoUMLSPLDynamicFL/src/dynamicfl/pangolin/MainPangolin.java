@@ -88,7 +88,7 @@ public class MainPangolin {
 							originalArgoUMLsrc);
 
 					List<String> results = LineTraces2BenchFormat.getResultsInBenchmarkFormat(classAndLines, currentFeature,
-							fUtils, true);
+							fUtils, originalArgoUMLsrc, true);
 
 					// Save to file
 

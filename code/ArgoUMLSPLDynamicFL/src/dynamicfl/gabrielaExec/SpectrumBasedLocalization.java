@@ -27,7 +27,7 @@ public class SpectrumBasedLocalization {
 
 		// TODO test more the 2wise expansion
 		// featExec = globalExpandWith2Wise(featExec);
-
+		System.out.println("\nSpectrum-Based Localization");
 		Map<String, Map<String, List<Integer>>> results = new LinkedHashMap<String, Map<String, List<Integer>>>();
 
 		try {
@@ -50,13 +50,13 @@ public class SpectrumBasedLocalization {
 				}
 
 				// Add to the results if greater or equal to the threshold
-				System.out.println("\nFeature: " + feature + "\n");
+				System.out.println("Creating ranking for " + feature);
 				Iterator<INode<String>> i = ranking.iterator();
 				while (i.hasNext()) {
 					INode<String> node = i.next();
 					double suspiciousness = ranking.getSuspiciousness(node);
 					if (suspiciousness >= threshold_sbfl) {
-						System.out.println(node.getIdentifier() + " " + suspiciousness);
+						// System.out.println(node.getIdentifier() + " " + suspiciousness);
 						String className = node.getIdentifier().split(";")[0];
 						Integer line = Integer.parseInt(node.getIdentifier().split(";")[1]);
 

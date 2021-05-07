@@ -1,17 +1,12 @@
 package dynamicfl;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
@@ -51,7 +46,7 @@ public class LineTraces2MethodComparison {
 			String source = FileUtils.getStringOfFile(new File(javaClass));
 			parser.setSource(source.toCharArray());
 			CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-			List<MethodDeclaration> methods = getMethods(cu);
+			List<MethodDeclaration> methods = LineTraces2BenchFormat.getMethods(cu);
 			
 			// for each line in this class
 			List<Integer> lines = classAbsPathAndLines.get(javaClass);
@@ -89,26 +84,6 @@ public class LineTraces2MethodComparison {
 		File path = new File(pathToMethodLevelGroundTruth, featureFile);
 		List<String> GTMethods = FileUtils.getLinesOfFile(path);
 		return GTMethods;
-	}
-
-
-
-	/**
-	 * Get methods ignoring those in anonymous classes
-	 * 
-	 * @param cu
-	 * @return
-	 */
-	public static List<MethodDeclaration> getMethods(CompilationUnit cu) {
-		List<MethodDeclaration> methods = JDTUtils.getMethods(cu);
-		List<MethodDeclaration> toRemove = new ArrayList<MethodDeclaration>();
-		for (MethodDeclaration method : methods) {
-			if (method.getParent() instanceof AnonymousClassDeclaration) {
-				toRemove.add(method);
-			}
-		}
-		methods.removeAll(toRemove);
-		return methods;
 	}
 
 }

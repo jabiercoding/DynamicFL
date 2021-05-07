@@ -103,8 +103,8 @@ public class DynamicFL2BenchResults {
 					Map<String, List<Integer>> absPathAndLines = transformToAbsPathAndLines(currentFeature,
 							originalArgoUMLsrc, classAndLines);
 
-					List<String> results = LineTraces2BenchFormat.getResultsInBenchmarkFormat(absPathAndLines,
-							currentFeature, fUtils, true);
+					List<String> results = LineTraces2BenchFormat.getResultsInBenchmarkFormat(classAndLines,
+							currentFeature, fUtils, originalArgoUMLsrc, true);
 
 					// Save to file benchmarkFormat results
 					StringBuffer buffer = new StringBuffer();

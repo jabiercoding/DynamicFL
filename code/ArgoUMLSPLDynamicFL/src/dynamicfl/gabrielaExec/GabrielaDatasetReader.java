@@ -18,12 +18,16 @@ public class GabrielaDatasetReader {
 	 * Get feat exec. It treats special cases such as .runtime files with "(" and
 	 * inner classes
 	 * 
-	 * @param executions file, with .config folders per feature, something like:
-	 *                   "C:/Downloads/Dataset/Dataset/ArgoUML/VariantsSourceCodeComparison/manual/variants";
+	 * @param ignoreNotArgoumlTraces
+	 * 
+	 * @param executions             file, with .config folders per feature,
+	 *                               something like:
+	 *                               "C:/Downloads/Dataset/Dataset/ArgoUML/VariantsSourceCodeComparison/manual/variants";
 	 * @return a map of features with, per each class, the lines that were exercised
 	 */
-	public static Map<String, Map<String, List<Integer>>> getFeatExec(String pathToExecutions) {
-
+	public static Map<String, Map<String, List<Integer>>> getFeatExec(String pathToExecutions,
+			boolean ignoreNotArgoumlTraces) {
+		System.out.println("ExecutionDatasetReader");
 		File executions = new File(pathToExecutions);
 		if (!executions.exists()) {
 			System.err
@@ -36,7 +40,7 @@ public class GabrielaDatasetReader {
 		for (File featFolder : executions.listFiles()) {
 			if (featFolder.getName().endsWith(".config")) {
 				String featName = featFolder.getName().substring(0, featFolder.getName().length() - ".config".length());
-				System.out.println("\n--" + featName);
+				System.out.println("Loading execution dataset for " + featName);
 
 				Map<String, List<Integer>> classResult = new LinkedHashMap<String, List<Integer>>();
 
@@ -46,7 +50,13 @@ public class GabrielaDatasetReader {
 						String className = classRuntime.getName().substring(0,
 								classRuntime.getName().length() - ".runtime".length());
 
-						System.out.println(className);
+						// System.out.println(className);
+
+						if (ignoreNotArgoumlTraces) {
+							if (!className.startsWith("org.argouml")) {
+								continue;
+							}
+						}
 
 						// Cut the method signature from the end of the class name
 						if (className.contains("(")) {
@@ -73,7 +83,7 @@ public class GabrielaDatasetReader {
 						}
 						Collections.sort(lineResult);
 						classResult.put(className, lineResult);
-						System.out.println(lineResult);
+						// System.out.println(lineResult);
 					}
 				}
 
