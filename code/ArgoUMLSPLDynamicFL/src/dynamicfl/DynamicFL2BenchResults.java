@@ -40,8 +40,9 @@ public class DynamicFL2BenchResults {
 		// Input path to the benchmark
 		File argoUMLSPLBenchmark = new File(pathToArgoUMLSPLBenchmark);
 
-		// Path to the src of the application used for exercising the features, which differs 
-		// from the benchmark variant only in imports that were used for runtime monitoring
+		// Path to the src of the application used for exercising the features, which
+		// differs from the benchmark variant only in imports that were used for runtime
+		// monitoring with jacoco
 		File pathToOriginalVariantDataset = new File(pathToOriginalVariant,
 				"ACTIVITYDIAGRAM.config" + File.separator + "src");
 
@@ -107,10 +108,11 @@ public class DynamicFL2BenchResults {
 
 					Map<String, List<Integer>> absPathAndLines = transformToAbsPathAndLines(currentFeature,
 							pathToOriginalVariantDataset, classAndLines);
-							// originalArgoUMLsrc, classAndLines);
+					// originalArgoUMLsrc, classAndLines);
 
 					List<String> results = LineTraces2BenchFormat.getResultsInBenchmarkFormat(classAndLines,
-							currentFeature, fUtils, originalArgoUMLsrc, true);
+							currentFeature, fUtils, pathToOriginalVariantDataset, true);
+							//currentFeature, fUtils, originalArgoUMLsrc, true);
 
 					// Save to file benchmarkFormat results
 					StringBuffer buffer = new StringBuffer();
