@@ -27,12 +27,17 @@ public class SpectrumBasedLocalization {
 
 		// TODO test more the 2wise expansion
 		// featExec = globalExpandWith2Wise(featExec);
+
 		System.out.println("\nSpectrum-Based Localization");
 		Map<String, Map<String, List<Integer>>> results = new LinkedHashMap<String, Map<String, List<Integer>>>();
 
 		try {
 			// Using the Stardust SBFL library
 			for (String feature : featExec.keySet()) {
+
+				// TODO test more the 2wise expansion
+				// featExec = targetedExpandWith2Wise(feature, featExec);
+
 				// prepare results
 				Map<String, List<Integer>> featResults = new LinkedHashMap<String, List<Integer>>();
 				results.put(feature, featResults);
@@ -79,6 +84,13 @@ public class SpectrumBasedLocalization {
 		return results;
 	}
 
+	/**
+	 * It will expand features [A B C] with [A B C A_and_B A_and_C B_and_C], for the
+	 * interactions, it will be 1 when it appears in both and 0 otherwise
+	 * 
+	 * @param featExec
+	 * @return the expanded list
+	 */
 	public static Map<String, Map<String, List<Integer>>> globalExpandWith2Wise(
 			Map<String, Map<String, List<Integer>>> featExec) {
 		Map<String, Map<String, List<Integer>>> expandedResult = new LinkedHashMap<String, Map<String, List<Integer>>>();
@@ -115,6 +127,51 @@ public class SpectrumBasedLocalization {
 					if (!pairF1F2content.isEmpty()) {
 						expandedResult.put(feature + GroundTruthExtractor.AND_FEATURES + feature2, pairF1F2content);
 					}
+				}
+			}
+		}
+		return expandedResult;
+	}
+
+	/**
+	 * For feature A, it will expand features [A B C] with [A B C A_and_B A_and_C],
+	 * for the interactions, it will be 1 when it appears in both and 0 otherwise
+	 * 
+	 * @param featExec
+	 * @return the expanded list
+	 */
+	public static Map<String, Map<String, List<Integer>>> targetedExpandWith2Wise(String targetFeature,
+			Map<String, Map<String, List<Integer>>> featExec) {
+		Map<String, Map<String, List<Integer>>> expandedResult = new LinkedHashMap<String, Map<String, List<Integer>>>();
+		for (String feature : featExec.keySet()) {
+			// put the single features
+			expandedResult.put(feature, featExec.get(feature));
+		}
+
+		for (String feature2 : featExec.keySet()) {
+			if (!targetFeature.equals(feature2)) {
+				Map<String, List<Integer>> pairF1F2content = new LinkedHashMap<String, List<Integer>>();
+				Map<String, List<Integer>> feat1 = featExec.get(targetFeature);
+				Map<String, List<Integer>> feat2 = featExec.get(feature2);
+				for (String classFeat1 : feat1.keySet()) {
+					List<Integer> feat2lines = feat2.get(classFeat1);
+					if (feat2lines != null) {
+						// they had the same class
+						List<Integer> feat1lines = feat1.get(classFeat1);
+						// get the intersection of both lists
+						List<Integer> intersection = new ArrayList<Integer>();
+						for (Integer line : feat1lines) {
+							if (feat2lines.contains(line)) {
+								intersection.add(line);
+							}
+						}
+						if (!intersection.isEmpty()) {
+							pairF1F2content.put(classFeat1, intersection);
+						}
+					}
+				}
+				if (!pairF1F2content.isEmpty()) {
+					expandedResult.put(targetFeature + GroundTruthExtractor.AND_FEATURES + feature2, pairF1F2content);
 				}
 			}
 		}
