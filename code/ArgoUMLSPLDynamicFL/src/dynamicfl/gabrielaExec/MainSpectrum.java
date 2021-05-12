@@ -13,17 +13,18 @@ public class MainSpectrum {
 
 	// Dataset from https://zenodo.org/record/4262529
 	// C:/Users/106836/Downloads/Dataset/Dataset/ArgoUML/VariantsSourceCodeComparison/manual/variants
-	// C:\\Users\\gabil\\Downloads\\dataset\\dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\variants
-	final static String PATH_DATASET_EXECUTIONS = "C:/Users/106836/Downloads/Dataset/Dataset/ArgoUML/VariantsSourceCodeComparison/manual/variants";
+	// C:\\Users\\gabil\\Downloads\\Dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\variants
+	// for running the comparisons with the runtime monitoring by unit tests use: Dataset\ArgoUML\VariantsSourceCodeComparison\tests\variants\
+	final static String PATH_DATASET_EXECUTIONS = "C:\\Users\\gabil\\Downloads\\Dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\variants";
 
 	// C:\Users\106836\Downloads\Dataset\Dataset\ArgoUML\VariantsSourceCodeComparison\manual\results\MethodComparison\groundTruthMethods
-	// C:\\Users\\gabil\\Downloads\\dataset\\dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\results\\MethodComparison\\groundTruthMethods
-	final static String PATH_METHOD_LEVEL_GROUND_TRUTH = "C:\\Users\\106836\\Downloads\\Dataset\\Dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\results\\MethodComparison\\groundTruthMethods";
+	// C:\\Users\\gabil\\Downloads\\Dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\results\\MethodComparison\\groundTruthMethods
+	final static String PATH_METHOD_LEVEL_GROUND_TRUTH = "C:\\Users\\gabil\\Downloads\\Dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\results\\MethodComparison\\groundTruthMethods";
 
 	// https://github.com/but4reuse/argouml-spl-benchmark
 	// C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark
 	// C:\\Users\\gabil\\eclipse-workspace\\ArgoUMLSPLBenchmark
-	final static String PATH_ARGOUMLSPL_BENCHMARK = "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark";
+	final static String PATH_ARGOUMLSPL_BENCHMARK = "C:\\Users\\gabil\\eclipse-workspace\\ArgoUMLSPLBenchmark";
 
 	final static boolean ONLY_ORIGINAL_SCENARIO = true;
 
@@ -63,7 +64,7 @@ public class MainSpectrum {
 				// scenario, feature, (precision, recall, f1, classPrecision, classRecall,
 				// classF1, methodPrecision, methodRecall, methodF1)
 				Map<String, Map<String, List<Double>>> result = DynamicFL2BenchResults.compute(
-						PATH_ARGOUMLSPL_BENCHMARK, PATH_METHOD_LEVEL_GROUND_TRUTH, results, output,
+						PATH_ARGOUMLSPL_BENCHMARK, PATH_METHOD_LEVEL_GROUND_TRUTH, PATH_DATASET_EXECUTIONS, results, output,
 						ONLY_ORIGINAL_SCENARIO);
 
 				System.out.println("\n6 Diagram features");

@@ -26,19 +26,24 @@ public class DynamicFL2BenchResults {
 	/**
 	 * Compute results
 	 * 
-	 * @param pathToArgoUMLSPLBenchmark e.g.,
-	 *                                  "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark"
+	 * @param pathToArgoUMLSPLBenchmark
+	 *            e.g., "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark"
 	 * @return map of scenario, feature, (precision, recall, f1, classPrecision,
 	 *         classRecall, classF1)
 	 */
 	public static Map<String, Map<String, List<Double>>> compute(String pathToArgoUMLSPLBenchmark,
-			String pathToMethodLevelGroundTruth, Map<String, Map<String, List<Integer>>> featureClassAndLines,
-			File output, boolean onlyScenarioOriginal) {
+			String pathToMethodLevelGroundTruth, String pathToOriginalVariant,
+			Map<String, Map<String, List<Integer>>> featureClassAndLines, File output, boolean onlyScenarioOriginal) {
 
 		Map<String, Map<String, List<Double>>> result = new LinkedHashMap<String, Map<String, List<Double>>>();
 
 		// Input path to the benchmark
 		File argoUMLSPLBenchmark = new File(pathToArgoUMLSPLBenchmark);
+
+		// Path to the src of the application used for exercising the features, which differs 
+		// from the benchmark variant only in imports that were used for runtime monitoring
+		File pathToOriginalVariantDataset = new File(pathToOriginalVariant,
+				"ACTIVITYDIAGRAM.config" + File.separator + "src");
 
 		output.mkdirs();
 
@@ -101,7 +106,8 @@ public class DynamicFL2BenchResults {
 					}
 
 					Map<String, List<Integer>> absPathAndLines = transformToAbsPathAndLines(currentFeature,
-							originalArgoUMLsrc, classAndLines);
+							pathToOriginalVariantDataset, classAndLines);
+							// originalArgoUMLsrc, classAndLines);
 
 					List<String> results = LineTraces2BenchFormat.getResultsInBenchmarkFormat(classAndLines,
 							currentFeature, fUtils, originalArgoUMLsrc, true);
@@ -118,7 +124,7 @@ public class DynamicFL2BenchResults {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-					
+
 					List<String> resultsMethodLevel = LineTraces2MethodComparison
 							.getResultsInMethodComparison(absPathAndLines, currentFeature, fUtils, true);
 
@@ -341,7 +347,8 @@ public class DynamicFL2BenchResults {
 	/**
 	 * Get all types
 	 * 
-	 * @param a java file
+	 * @param a
+	 *            java file
 	 * @return list of types, that can be more than one
 	 */
 	public static List<TypeDeclaration> getTypes(File f) {
