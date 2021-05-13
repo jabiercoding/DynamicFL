@@ -11,6 +11,7 @@ import fk.stardust.localizer.IFaultLocalizer;
 import fk.stardust.localizer.Ranking;
 import fk.stardust.traces.INode;
 import fk.stardust.traces.ISpectra;
+import fk.stardust.traces.ITrace;
 import groundTruthExtractor.GroundTruthExtractor;
 
 public class SpectrumBasedLocalization {
@@ -36,15 +37,21 @@ public class SpectrumBasedLocalization {
 			for (String feature : featExec.keySet()) {
 
 				// TODO test more the 2wise expansion
-				// featExec = targetedExpandWith2Wise(feature, featExec);
-
+				// no expansion
+				Map<String, Map<String, List<Integer>>> featExec2 = featExec;
+				// targeted expansion
+				// Map<String, Map<String, List<Integer>>> featExec2 = targetedExpandWith2Wise(feature, featExec);
+				// global expansion
+				// Map<String, Map<String, List<Integer>>> featExec2 = globalExpandWith2Wise(featExec);
+				
 				// prepare results
 				Map<String, List<Integer>> featResults = new LinkedHashMap<String, List<Integer>>();
 				results.put(feature, featResults);
 
 				// Get the ranking from the SBFL technique
-				MySpectraProvider provider = new MySpectraProvider(feature, featExec);
+				MySpectraProvider provider = new MySpectraProvider(feature, featExec2);
 				ISpectra<String> spectra = provider.loadSpectra();
+				// System.out.println(getCSV(spectra));
 				IFaultLocalizer<String> localizer = algo;
 				Ranking<String> ranking = localizer.localize(spectra);
 
@@ -176,6 +183,33 @@ public class SpectrumBasedLocalization {
 			}
 		}
 		return expandedResult;
+	}
+	
+	/**
+	 * get a stringbuffer of the spectra
+	 * @param spectra
+	 * @return stringbuffer
+	 */
+	public static StringBuffer getCSV(ISpectra<String> spectra) {
+		StringBuffer buffer = new StringBuffer();
+		for (ITrace<String> trace : spectra.getTraces()) {
+			buffer.append(",");
+			// traces do not have identifier...
+			buffer.append(trace);
+		}
+		buffer.append("\n");
+		for (INode<String> node : spectra.getNodes()) {
+			buffer.append(node.getIdentifier());
+			for (ITrace<String> trace : spectra.getTraces()) {
+				if (trace.isInvolved(node)) {
+					buffer.append(",1");
+				} else {
+					buffer.append(",0");
+				}
+			}
+			buffer.append("\n");
+		}
+		return buffer;
 	}
 
 }
