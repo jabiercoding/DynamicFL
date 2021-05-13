@@ -1,6 +1,8 @@
 package dynamicfl;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -199,7 +201,7 @@ public class DynamicFL2BenchResults {
 						resultFeature.add(f13);
 
 						System.out.println("\nLine level metrics");
-						List<Double> metrics = MetricsCalculation.getCSVInformationPerFeature(outputScenarioLine,
+						List<Double> metrics = getCSVInformationPerFeature(outputScenarioLine,
 								currentFeature);
 						System.out.println("Precision: " + metrics.get(0));
 						System.out.println("Recall: " + metrics.get(1));
@@ -211,6 +213,63 @@ public class DynamicFL2BenchResults {
 		}
 		resultsToFile(result, new File(output, "MetricsScenarioFeature.csv"));
 		return result;
+	}
+	
+	
+	/**
+	 * Computes precision, recall and f1 at line level
+	 * 
+	 * @param resultMetrics_path
+	 * @param currentFeature
+	 * @return metrics
+	 */
+	public static List<Double> getCSVInformationPerFeature(File resultMetrics_path, String currentFeature)
+			throws IOException {
+		File file = new File(resultMetrics_path, currentFeature + ".csv");
+		List<Double> metrics = new ArrayList<Double>();
+
+		Double retrievedtotalLines = Double.valueOf(0), originaltotalLines = Double.valueOf(0),
+				truepositiveLines = Double.valueOf(0), falsepositiveLines = Double.valueOf(0),
+				falsenegativeLines = Double.valueOf(0);
+		BufferedReader br = new BufferedReader(new FileReader(file.getAbsoluteFile()));
+		String line = "";
+		Boolean headerLine = true;
+		while ((line = br.readLine()) != null) {
+			if (headerLine) {
+				headerLine = false;
+			} else {
+				String[] l = line.split(","); // use comma as separator
+				truepositiveLines += Double.parseDouble(l[2]);
+				falsepositiveLines += Double.parseDouble(l[3]);
+				falsenegativeLines += Double.parseDouble(l[4]);
+				originaltotalLines += Double.parseDouble(l[5]);
+				retrievedtotalLines += Double.parseDouble(l[6]);
+			}
+		}
+		br.close();
+
+		Double precisionLines = Double.valueOf(truepositiveLines / (truepositiveLines + falsepositiveLines));
+		Double recallLines = Double.valueOf(truepositiveLines / (truepositiveLines + falsenegativeLines));
+		Double f1scorelines = 2 * ((precisionLines * recallLines) / (precisionLines + recallLines));
+		metrics.add(precisionLines);
+		metrics.add(recallLines);
+		metrics.add(f1scorelines);
+
+		// write results in a csv file
+		/*
+		 * String filemetrics = "results_" + file.getName();
+		 * 
+		 * try { FileWriter csvWriter = new FileWriter(resultMetrics_path +
+		 * File.separator + filemetrics); List<List<String>> headerRows = Arrays.asList(
+		 * Arrays.asList("PrecisionLines", "RecalLines", "F1ScoreLines"),
+		 * Arrays.asList(precisionLines.toString(), recallLines.toString(),
+		 * f1scorelines.toString())); for (List<String> rowData : headerRows) {
+		 * csvWriter.append(String.join(",", rowData)); csvWriter.append("\n"); }
+		 * csvWriter.flush(); csvWriter.close(); } catch (IOException e) {
+		 * e.printStackTrace(); }
+		 */
+
+		return metrics;
 	}
 
 	/**
