@@ -1,6 +1,7 @@
 package dynamicfl;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -30,10 +31,12 @@ public class DynamicFL2BenchResults {
 	 *            e.g., "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark"
 	 * @return map of scenario, feature, (precision, recall, f1, classPrecision,
 	 *         classRecall, classF1)
+	 * @throws IOException
 	 */
 	public static Map<String, Map<String, List<Double>>> compute(String pathToArgoUMLSPLBenchmark,
-			String pathToMethodLevelGroundTruth, String pathToOriginalVariant,
-			Map<String, Map<String, List<Integer>>> featureClassAndLines, File output, boolean onlyScenarioOriginal) {
+			String pathToMethodLevelGroundTruth, String pathToLineLevelGroundTruth, String pathToOriginalVariant,
+			Map<String, Map<String, List<Integer>>> featureClassAndLines, File output, boolean onlyScenarioOriginal)
+			throws IOException {
 
 		Map<String, Map<String, List<Double>>> result = new LinkedHashMap<String, Map<String, List<Double>>>();
 
@@ -112,7 +115,7 @@ public class DynamicFL2BenchResults {
 
 					List<String> results = LineTraces2BenchFormat.getResultsInBenchmarkFormat(classAndLines,
 							currentFeature, fUtils, pathToOriginalVariantDataset, true);
-							//currentFeature, fUtils, originalArgoUMLsrc, true);
+					// currentFeature, fUtils, originalArgoUMLsrc, true);
 
 					// Save to file benchmarkFormat results
 					StringBuffer buffer = new StringBuffer();
@@ -144,6 +147,13 @@ public class DynamicFL2BenchResults {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+
+					// Save to file line-level results
+					File outputScenarioLine = new File(output, scenario.getName() + "_line");
+					outputScenarioLine.mkdirs();
+
+					LineTraces2LineComparison.getResultsInLineComparison(absPathAndLines, currentFeature,
+							pathToLineLevelGroundTruth, pathToOriginalVariant, fUtils, outputScenarioLine, true);
 
 					// Metrics
 					System.out.println("Official Metrics");
@@ -187,6 +197,14 @@ public class DynamicFL2BenchResults {
 						resultFeature.add(precision3);
 						resultFeature.add(recall3);
 						resultFeature.add(f13);
+
+						System.out.println("\nLine level metrics");
+						List<Double> metrics = MetricsCalculation.getCSVInformationPerFeature(outputScenarioLine,
+								currentFeature);
+						System.out.println("Precision: " + metrics.get(0));
+						System.out.println("Recall: " + metrics.get(1));
+						System.out.println("F1: " + metrics.get(2));
+						resultFeature.addAll(metrics);
 					}
 				}
 			}
@@ -204,7 +222,7 @@ public class DynamicFL2BenchResults {
 	public static void resultsToFile(Map<String, Map<String, List<Double>>> result, File output) {
 		try {
 			FileUtils.writeFile(output,
-					"Scenario;Feature;Precision;Recall;F1;ClassPrecision;ClassRecall;ClassF1;MethodPrecision;MethodRecall;MethodF1\n");
+					"Scenario;Feature;Precision;Recall;F1;ClassPrecision;ClassRecall;ClassF1;MethodPrecision;MethodRecall;MethodF1;LinePrecision;LineRecall;LineF1\n");
 			for (String scenario : result.keySet()) {
 				Map<String, List<Double>> scenarioFeatures = result.get(scenario);
 				for (String feature : scenarioFeatures.keySet()) {

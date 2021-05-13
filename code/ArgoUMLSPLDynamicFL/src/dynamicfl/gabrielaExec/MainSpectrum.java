@@ -21,6 +21,9 @@ public class MainSpectrum {
 	// C:\\Users\\gabil\\Downloads\\Dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\results\\MethodComparison\\groundTruthMethods
 	final static String PATH_METHOD_LEVEL_GROUND_TRUTH = "C:\\Users\\gabil\\Downloads\\Dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\results\\MethodComparison\\groundTruthMethods";
 
+	// for running the comparisons with the runtime monitoring by unit tests use: Dataset\ArgoUML\VariantsSourceCodeComparison\tests\results\groundTruthVariants
+	final static String PATH_LINE_LEVEL_GROUND_TRUTH = "C:\\Users\\gabil\\Downloads\\Dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\results\\groundTruthVariants";
+	
 	// https://github.com/but4reuse/argouml-spl-benchmark
 	// C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark
 	// C:\\Users\\gabil\\eclipse-workspace\\ArgoUMLSPLBenchmark
@@ -64,7 +67,7 @@ public class MainSpectrum {
 				// scenario, feature, (precision, recall, f1, classPrecision, classRecall,
 				// classF1, methodPrecision, methodRecall, methodF1)
 				Map<String, Map<String, List<Double>>> result = DynamicFL2BenchResults.compute(
-						PATH_ARGOUMLSPL_BENCHMARK, PATH_METHOD_LEVEL_GROUND_TRUTH, PATH_DATASET_EXECUTIONS, results, output,
+						PATH_ARGOUMLSPL_BENCHMARK, PATH_METHOD_LEVEL_GROUND_TRUTH, PATH_LINE_LEVEL_GROUND_TRUTH, PATH_DATASET_EXECUTIONS, results, output,
 						ONLY_ORIGINAL_SCENARIO);
 
 				System.out.println("\n6 Diagram features");
