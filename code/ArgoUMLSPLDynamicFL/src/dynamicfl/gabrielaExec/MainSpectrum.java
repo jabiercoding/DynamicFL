@@ -12,23 +12,21 @@ import dynamicfl.gabrielaExec.gridSearch.ScoresBuilder;
 public class MainSpectrum {
 
 	// Dataset from https://zenodo.org/record/4262529
-	// C:/Users/106836/Downloads/Dataset/Dataset/ArgoUML/VariantsSourceCodeComparison/manual/variants
-	// C:\\Users\\gabil\\Downloads\\Dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\variants
-	// for running the comparisons with the runtime monitoring by unit tests use: Dataset\ArgoUML\VariantsSourceCodeComparison\tests\variants\
-	final static String PATH_DATASET_EXECUTIONS = "C:\\Users\\gabil\\Downloads\\Dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\variants";
-
-	// C:\Users\106836\Downloads\Dataset\Dataset\ArgoUML\VariantsSourceCodeComparison\manual\results\MethodComparison\groundTruthMethods
-	// C:\\Users\\gabil\\Downloads\\Dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\results\\MethodComparison\\groundTruthMethods
-	final static String PATH_METHOD_LEVEL_GROUND_TRUTH = "C:\\Users\\gabil\\Downloads\\Dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\results\\MethodComparison\\groundTruthMethods";
-
-	// for running the comparisons with the runtime monitoring by unit tests use: Dataset\ArgoUML\VariantsSourceCodeComparison\tests\results\groundTruthVariants
-	final static String PATH_LINE_LEVEL_GROUND_TRUTH = "C:\\Users\\gabil\\Downloads\\Dataset\\ArgoUML\\VariantsSourceCodeComparison\\manual\\results\\groundTruthVariants";
+	// C:/Users/gabil/Downloads/Dataset/
+	// C:/Users/106836/Downloads/Dataset/Dataset/
+	final static String PATH_DATASET = "C:/Users/106836/Downloads/Dataset/Dataset/";
 	
 	// https://github.com/but4reuse/argouml-spl-benchmark
 	// C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark
 	// C:\\Users\\gabil\\eclipse-workspace\\ArgoUMLSPLBenchmark
-	final static String PATH_ARGOUMLSPL_BENCHMARK = "C:\\Users\\gabil\\eclipse-workspace\\ArgoUMLSPLBenchmark";
-
+	final static String PATH_ARGOUMLSPL_BENCHMARK = "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark";
+	
+	// for running the comparisons with the runtime monitoring by unit tests use: ArgoUML\VariantsSourceCodeComparison\tests\variants\
+	final static String PATH_DATASET_EXECUTIONS = PATH_DATASET + "ArgoUML/VariantsSourceCodeComparison/manual/variants";
+	final static String PATH_DATASET_METHOD_LEVEL_GROUND_TRUTH = PATH_DATASET + "ArgoUML/VariantsSourceCodeComparison/manual/results/MethodComparison/groundTruthMethods";
+	// for running the comparisons with the runtime monitoring by unit tests use: ArgoUML\VariantsSourceCodeComparison\tests\results\groundTruthVariants
+	final static String PATH_DATASET_LINE_LEVEL_GROUND_TRUTH = PATH_DATASET + "ArgoUML/VariantsSourceCodeComparison/manual/results/groundTruthVariants";
+	
 	final static boolean ONLY_ORIGINAL_SCENARIO = true;
 
 	// e.g., michelon et al. 2021 execution dataset and groundtruth contains
@@ -67,7 +65,7 @@ public class MainSpectrum {
 				// scenario, feature, (precision, recall, f1, classPrecision, classRecall,
 				// classF1, methodPrecision, methodRecall, methodF1)
 				Map<String, Map<String, List<Double>>> result = DynamicFL2BenchResults.compute(
-						PATH_ARGOUMLSPL_BENCHMARK, PATH_METHOD_LEVEL_GROUND_TRUTH, PATH_LINE_LEVEL_GROUND_TRUTH, PATH_DATASET_EXECUTIONS, results, output,
+						PATH_ARGOUMLSPL_BENCHMARK, PATH_DATASET_METHOD_LEVEL_GROUND_TRUTH, PATH_DATASET_LINE_LEVEL_GROUND_TRUTH, PATH_DATASET_EXECUTIONS, results, output,
 						ONLY_ORIGINAL_SCENARIO);
 
 				System.out.println("\n6 Diagram features");
@@ -82,20 +80,6 @@ public class MainSpectrum {
 				System.out.println("Avg. Precision:\t" + avgPrecision);
 				System.out.println("Avg. Recall:\t" + avgRecall);
 				System.out.println("Avg. F1:\t" + avgF1);
-
-				System.out.println("\nResults from VAMOS 2021");
-				System.out.println("2021 Precision:\t0.068333333");
-				System.out.println("2021 Recall:\t0.318333333");
-				System.out.println("2021 F1:\t0.105");
-
-				// Results from 2021 solution
-				// ActivityDiagram 0.05 0.24 0.08
-				// CollaborationDiagram 0.04 0.19 0.06
-				// DeploymentDiagram 0.04 0.45 0.07
-				// SequenceDiagram 0.12 0.25 0.16
-				// StateDiagram 0.08 0.31 0.13
-				// UseCaseDiagram 0.08 0.47 0.13
-				// AVG: 0.068333333 0.318333333 0.105
 			}
 
 			// Set the output file path
