@@ -13,17 +13,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * FeatureCoverage aims to get the number of lines executed for each
- * feature that belongs solely to the feature (and not BASE) to get the
- * knowledge of how the traces from exercising features are affecting the results,
- * and if the technique could be improved for higher recall
+ * FeatureCoverage aims to get the number of lines executed for each feature
+ * that belongs solely to the feature (and not BASE) to get the knowledge of how
+ * the traces from exercising features are affecting the results, and if the
+ * technique could be improved for higher recall
  */
 public class FeatureCoverage {
 
 	/**
 	 * Computes the ratio of lines of a feature and lines executed
 	 * 
-	 * @param classAndLines
+	 * @param linesExecFeature
 	 * @param feature
 	 * @param path
 	 *            to the ground truth variant of each feature
@@ -51,8 +51,6 @@ public class FeatureCoverage {
 		// for each class of the results
 		for (String javaClass : linesExecFeature.keySet()) {
 
-			// String absPath = javaClass.replace('.', File.separatorChar);
-			// absPath = absPath + ".java";
 			File retrievedFile = new File(javaClass);
 			List<String> linesRetrieved = new ArrayList<>();
 			List<String> bufferRetrievedFile = new ArrayList<>();
@@ -138,24 +136,26 @@ public class FeatureCoverage {
 	 * ground truth feature variant with the variant containing the lines of the
 	 * feature exercised
 	 * 
-	 * @param filesVariantCompare from the BASE code without any feature
-	 * @param filesFeatureVariant from the feature code containing BASE
-	 * @param filesRetrieved from the runtime monitoring
+	 * @param filesVariantCompare
+	 *            from the BASE code without any feature
+	 * @param filesFeatureVariant
+	 *            from the feature code containing BASE
+	 * @param filesRetrieved
+	 *            from the runtime monitoring
 	 * @throws IOException
 	 */
-	public static void intersectionVariants(Map<File, List<String>> filesVariantCompare,
+	public static void intersectionVariants(Map<File, List<String>> filesBASEVariant,
 			Map<File, List<String>> filesFeatureVariant, Map<File, List<String>> filesRetrieved) throws IOException {
 
 		Integer linesIntersection = 0, totalLinesFeature = 0;
 
 		// files in common in filesVariantCompare and in featureVariant
 		for (Entry<File, List<String>> f : filesFeatureVariant.entrySet()) {
-			Integer linesInCommon = 0, linesRemainingFeatureVariant = 0, linesFeatureVariant = 0;
 			List<String> original = f.getValue();
 			List<String> revised = new ArrayList<>();
 
-			// compare text of files
-			for (Entry<File, List<String>> fBase : filesVariantCompare.entrySet()) {
+			// compare lines of files
+			for (Entry<File, List<String>> fBase : filesBASEVariant.entrySet()) {
 				if (f.getKey().getPath().toString()
 						.substring(f.getKey().toPath().toString().indexOf("org" + File.separator) + 4)
 						.equals(fBase.getKey().toPath().toString()
@@ -164,34 +164,33 @@ public class FeatureCoverage {
 
 					// remove from file of the feature variant all the lines of BASE
 					original.removeAll(revised);
-					linesFeatureVariant += original.size();
-					totalLinesFeature += original.size();
-
-					if (original.size() > 0) {// otherwise there are no lines of this file that belongs solely to this
-												// feature
-						for (Entry<File, List<String>> fRetrieved : filesRetrieved.entrySet()) {
-							if (f.getKey().getPath().toString()
-									.substring(f.getKey().toPath().toString().indexOf("org" + File.separator) + 4)
-									.equals(fRetrieved.getKey().toPath().toString().substring(
-											fRetrieved.getKey().toPath().toString().indexOf("org" + File.separator)
-													+ 4))) {
-								revised = fRetrieved.getValue();
-
-								// remove from the array of retrieved lines the lines solely of the feature
-								original.removeAll(revised);
-								linesRemainingFeatureVariant += original.size();
-								int linesInCommonAux = linesFeatureVariant - linesRemainingFeatureVariant;
-								linesInCommon += linesInCommonAux;
-								break;
-							}
-						}
-					}
 					break;
 				}
 			}
-			linesIntersection += linesInCommon;
+
+			totalLinesFeature += original.size();
+
+			if (original.size() > 0) {// otherwise there are no lines of this file that belongs solely to this
+				// feature
+				for (Entry<File, List<String>> fRetrieved : filesRetrieved.entrySet()) {
+					if (f.getKey().getPath().toString()
+							.substring(f.getKey().toPath().toString().indexOf("org" + File.separator) + 4)
+							.equals(fRetrieved.getKey().toPath().toString().substring(
+									fRetrieved.getKey().toPath().toString().indexOf("org" + File.separator) + 4))) {
+						revised = fRetrieved.getValue();
+
+						// remove from the array of solely lines of the feature the lines in common from
+						// the array of runtime traces
+						int originalBeforeIntersectionRevised = original.size();
+						original.removeAll(revised);
+						int linesInCommonAux = originalBeforeIntersectionRevised - original.size();
+						linesIntersection += linesInCommonAux;
+						break;
+					}
+				}
+			}
 		}
 		System.out.println("Ratio: " + (linesIntersection * 100) / totalLinesFeature + "%. Total Lines of the Feature: "
-				+ totalLinesFeature + ". Lines in common with the runtime traces: " + linesIntersection+".");
+				+ totalLinesFeature + ". Lines in common with the runtime traces: " + linesIntersection + ".");
 	}
 }
