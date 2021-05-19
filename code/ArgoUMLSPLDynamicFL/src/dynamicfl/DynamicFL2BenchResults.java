@@ -18,11 +18,34 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import dynamicfl.granularity.ClassGranularity;
+import dynamicfl.granularity.Granularity;
+import dynamicfl.granularity.LineGranularity;
+import dynamicfl.granularity.MethodGranularity;
+import dynamicfl.granularity.OfficialResultsGranularity;
+import dynamicfl.scores.ScoreTriplet;
 import metricsCalculation.MetricsCalculation;
 import utils.FeatureUtils;
 import utils.FileUtils;
 
 public class DynamicFL2BenchResults {
+	
+	static List<Granularity> granularities;
+	
+	public static void setGranularities(Granularity... givenGranularities) {
+		granularities = new ArrayList<Granularity>();
+		for (Granularity granularity : givenGranularities) {
+			granularities.add(granularity);
+		}
+	}
+	
+	public static void setDefaultGranularities() {
+		DynamicFL2BenchResults.setGranularities(
+				new OfficialResultsGranularity(),
+				new ClassGranularity(),
+				new LineGranularity(),
+				new MethodGranularity());
+	}
 
 	static Map<String, String> CACHE_TYPE_ABSPATH = new HashMap<String, String>();
 
@@ -394,15 +417,27 @@ public class DynamicFL2BenchResults {
 	}
 
 	public static double getAvgPrecision(Map<String, Map<String, List<Double>>> result) {
-		return getAvg(result, 6);
+		return getAvg(result, 0);
 	}
 
 	public static double getAvgRecall(Map<String, Map<String, List<Double>>> result) {
-		return getAvg(result, 7);
+		return getAvg(result, 1);
 	}
 
 	public static double getAvgF1(Map<String, Map<String, List<Double>>> result) {
-		return getAvg(result, 8);
+		return getAvg(result, 2);
+	}
+	
+	public static ScoreTriplet getAvgScore(Map<String, Map<String, List<Double>>> result) {
+		ScoreTriplet score = new ScoreTriplet();
+		for (Granularity granularity : granularities) {
+			score.add(
+					granularity, 
+					getAvg(result, granularity.precision()),
+					getAvg(result, granularity.recall()),
+					getAvg(result, granularity.f1()));
+		}
+		return score;
 	}
 
 	private static double getAvg(Map<String, Map<String, List<Double>>> result, int index) {

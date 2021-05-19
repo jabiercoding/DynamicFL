@@ -9,7 +9,12 @@ import dynamicfl.DynamicFL2BenchResults;
 import dynamicfl.FeatureCoverage;
 import dynamicfl.gabrielaExec.gridSearch.Configuration;
 import dynamicfl.gabrielaExec.gridSearch.GridSearch;
-import dynamicfl.gabrielaExec.gridSearch.ScoresBuilder;
+import dynamicfl.granularity.ClassGranularity;
+import dynamicfl.granularity.LineGranularity;
+import dynamicfl.granularity.MethodGranularity;
+import dynamicfl.granularity.OfficialResultsGranularity;
+import dynamicfl.scores.ScoreTriplet;
+import dynamicfl.scores.ScoresBuilder;
 
 public class MainSpectrum {
 
@@ -56,6 +61,8 @@ public class MainSpectrum {
 			// read data set
 			Map<String, Map<String, List<Integer>>> featExec = GabrielaDatasetReader
 					.getFeatExec(PATH_DATASET_EXECUTIONS, IGNORE_NOT_ARGOUML_TRACES);
+			
+			DynamicFL2BenchResults.setDefaultGranularities();
 
 			// Ratio of lines of a feature with the lines executed
 			for (Entry<String, Map<String, List<Integer>>> feat : featExec.entrySet()) {
@@ -92,19 +99,17 @@ public class MainSpectrum {
 						ONLY_ORIGINAL_SCENARIO);
 
 				System.out.println("\n6 Diagram features");
-				double avgPrecision = DynamicFL2BenchResults.getAvgPrecision(result);
-				double avgRecall = DynamicFL2BenchResults.getAvgRecall(result);
-				double avgF1 = DynamicFL2BenchResults.getAvgF1(result);
+				ScoreTriplet avgScore = DynamicFL2BenchResults.getAvgScore(result);
 
-				scores.add(conf.algo.getName(), Double.toString(conf.threshold_sbfl), avgPrecision, avgRecall, avgF1);
+				scores.add(conf.algo.getName(), Double.toString(conf.threshold_sbfl), avgScore);
 				
-				System.out.println("Avg. Precision:\t" + avgPrecision);
-				System.out.println("Avg. Recall:\t" + avgRecall);
-				System.out.println("Avg. F1:\t" + avgF1);
+//				System.out.println("Avg. Precision:\t" + avgPrecision);
+//				System.out.println("Avg. Recall:\t" + avgRecall);
+//				System.out.println("Avg. F1:\t" + avgF1);
 			}
 
 			// Set the output file path
-			scores.toCSV(new File(mainOutput, "result.csv"));
+			scores.toCSV(mainOutput);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
