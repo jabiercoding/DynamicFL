@@ -394,15 +394,15 @@ public class DynamicFL2BenchResults {
 	}
 
 	public static double getAvgPrecision(Map<String, Map<String, List<Double>>> result) {
-		return getAvg(result, 7);
+		return getAvg(result, 6);
 	}
 
 	public static double getAvgRecall(Map<String, Map<String, List<Double>>> result) {
-		return getAvg(result, 8);
+		return getAvg(result, 7);
 	}
 
 	public static double getAvgF1(Map<String, Map<String, List<Double>>> result) {
-		return getAvg(result, 9);
+		return getAvg(result, 8);
 	}
 
 	private static double getAvg(Map<String, Map<String, List<Double>>> result, int index) {

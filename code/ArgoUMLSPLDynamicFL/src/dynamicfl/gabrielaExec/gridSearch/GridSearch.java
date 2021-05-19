@@ -45,7 +45,7 @@ public class GridSearch implements Iterable<Configuration> {
 	List<AbstractSpectrumBasedFaultLocalizer<String>> algos;
 	List<Double> thresholds;
 	Queue<Configuration> configurations;
-	int num_trials = 2;
+	int num_trials = 10;
 
 	public GridSearch() {
 		initializeAlgorithms();
@@ -55,39 +55,39 @@ public class GridSearch implements Iterable<Configuration> {
 
 	private void initializeAlgorithms() {
 		algos = new ArrayList<>();
-//		algos.add(new Ample<String>());
-//		algos.add(new Anderberg<String>());
-//		algos.add(new ArithmeticMean<String>());
-//		algos.add(new Cohen<String>());
-//		algos.add(new Dice<String>());
-//		algos.add(new Euclid<String>());
-//		algos.add(new Fleiss<String>());
-//		algos.add(new GeometricMean<String>());
-//		algos.add(new Goodman<String>());
-//		algos.add(new Hamann<String>());
-//		algos.add(new Hamming<String>());
-//		algos.add(new HarmonicMean<String>());
+		algos.add(new Ample<String>());
+		algos.add(new Anderberg<String>());
+		algos.add(new ArithmeticMean<String>());
+		algos.add(new Cohen<String>());
+		algos.add(new Dice<String>());
+		algos.add(new Euclid<String>());
+		algos.add(new Fleiss<String>());
+		algos.add(new GeometricMean<String>());
+		algos.add(new Goodman<String>());
+		algos.add(new Hamann<String>());
+		algos.add(new Hamming<String>());
+		algos.add(new HarmonicMean<String>());
 		algos.add(new Jaccard<String>());
-//		algos.add(new Kulczynski1<String>());
-//		algos.add(new Kulczynski2<String>());
-//		algos.add(new M1<String>());
-//		algos.add(new M2<String>());
-//		algos.add(new Ochiai<String>());
-//		algos.add(new Ochiai2<String>());
-//		algos.add(new Overlap<String>());
-//		algos.add(new RogersTanimoto<String>());
-//		algos.add(new Rogot1<String>());
-//		algos.add(new Rogot2<String>());
-//		algos.add(new RussellRao<String>());
-//		algos.add(new Scott<String>());
-//		algos.add(new SimpleMatching<String>());
-//		algos.add(new Sokal<String>());
-//		algos.add(new SorensenDice<String>());
+		algos.add(new Kulczynski1<String>());
+		algos.add(new Kulczynski2<String>());
+		algos.add(new M1<String>());
+		algos.add(new M2<String>());
+		algos.add(new Ochiai<String>());
+		algos.add(new Ochiai2<String>());
+		algos.add(new Overlap<String>());
+		algos.add(new RogersTanimoto<String>());
+		algos.add(new Rogot1<String>());
+		algos.add(new Rogot2<String>());
+		algos.add(new RussellRao<String>());
+		algos.add(new Scott<String>());
+		algos.add(new SimpleMatching<String>());
+		algos.add(new Sokal<String>());
+		algos.add(new SorensenDice<String>());
 		algos.add(new Tarantula<String>());
-//		algos.add(new Wong1<String>());
-//		algos.add(new Wong2<String>());
-//		algos.add(new Wong3<String>());
-//		algos.add(new Zoltar<String>());
+		algos.add(new Wong1<String>());
+		algos.add(new Wong2<String>());
+		algos.add(new Wong3<String>());
+		algos.add(new Zoltar<String>());
 
 	}
 

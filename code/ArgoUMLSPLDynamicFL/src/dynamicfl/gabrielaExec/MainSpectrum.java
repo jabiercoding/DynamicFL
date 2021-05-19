@@ -43,7 +43,7 @@ public class MainSpectrum {
 	// see GroundTruthExtractor.getAllArgoUMLSPLRelevantJavaFiles
 	// Use IGNORE=false for a fair comparison with Michelon et al. 2021 and false
 	// otherwise
-	final static boolean IGNORE_NOT_ARGOUML_TRACES = true;
+	final static boolean IGNORE_NOT_ARGOUML_TRACES = false;
 
 	public static void main(String[] args) {
 
