@@ -307,7 +307,7 @@ public class DynamicFL2BenchResults {
 	 * @param classAndLines
 	 * @return
 	 */
-	private static Map<String, List<Integer>> transformToAbsPathAndLines(String currentFeature, File originalArgoUMLsrc,
+	public static Map<String, List<Integer>> transformToAbsPathAndLines(String currentFeature, File originalArgoUMLsrc,
 			Map<String, List<Integer>> classAndLines) {
 		Map<String, List<Integer>> result = new LinkedHashMap<String, List<Integer>>();
 		for (String currentClass : classAndLines.keySet()) {

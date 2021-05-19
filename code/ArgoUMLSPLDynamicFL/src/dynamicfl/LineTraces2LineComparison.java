@@ -50,9 +50,6 @@ public class LineTraces2LineComparison {
 			String pathToLineLevelGroundTruth, String pathToOriginalVariant, FeatureUtils fUtils,
 			File outputScenarioLine, boolean crossVariantsCheck) throws IOException {
 
-		File variantOriginal = new File(pathToOriginalVariant,
-				feature.toUpperCase() + ".config" + File.separator + "src");
-
 		File variantFeatureGT = new File(pathToLineLevelGroundTruth, feature.toUpperCase() + ".1");
 
 		Map<File, List<String>> filesRetrieved = new HashMap<>();
@@ -60,7 +57,6 @@ public class LineTraces2LineComparison {
 
 		LinkedList<File> filesFeatureVariantList = new LinkedList<>();
 		getFilesToProcess(variantFeatureGT, filesFeatureVariantList);
-		filesFeatureVariantList.remove(variantOriginal);
 
 		// for each class of the results
 		for (String javaClass : classAbsPathAndLines.keySet()) {
@@ -453,7 +449,7 @@ public class LineTraces2LineComparison {
 	 * @param files
 	 * @return
 	 */
-	private static void getFilesToProcess(File featureVariantDir, List<File> files) {
+	public static void getFilesToProcess(File featureVariantDir, List<File> files) {
 		if (featureVariantDir.isDirectory()) {
 			for (File file : featureVariantDir.listFiles()) {
 				if (!files.contains(featureVariantDir) && !file.getName().equals(featureVariantDir.getName()))

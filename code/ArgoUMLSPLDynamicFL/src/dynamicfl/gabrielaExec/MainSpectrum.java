@@ -3,8 +3,10 @@ package dynamicfl.gabrielaExec;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import dynamicfl.DynamicFL2BenchResults;
+import dynamicfl.FeatureCoverage;
 import dynamicfl.gabrielaExec.gridSearch.Configuration;
 import dynamicfl.gabrielaExec.gridSearch.GridSearch;
 import dynamicfl.gabrielaExec.gridSearch.ScoresBuilder;
@@ -12,21 +14,26 @@ import dynamicfl.gabrielaExec.gridSearch.ScoresBuilder;
 public class MainSpectrum {
 
 	// Dataset from https://zenodo.org/record/4262529
-	// C:/Users/gabil/Downloads/Dataset/
-	// C:/Users/106836/Downloads/Dataset/Dataset/
-	final static String PATH_DATASET = "C:/Users/106836/Downloads/Dataset/Dataset/";
-	
+	// C:\Users\gabil\Downloads\Dataset\Dataset
+	// C:/Users/106836/Downloads/Dataset
+	final static String PATH_DATASET = "C:\\Users\\gabil\\Downloads\\Dataset\\";
+
 	// https://github.com/but4reuse/argouml-spl-benchmark
 	// C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark
 	// C:\\Users\\gabil\\eclipse-workspace\\ArgoUMLSPLBenchmark
-	final static String PATH_ARGOUMLSPL_BENCHMARK = "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark";
-	
-	// for running the comparisons with the runtime monitoring by unit tests use: ArgoUML\VariantsSourceCodeComparison\tests\variants\
-	final static String PATH_DATASET_EXECUTIONS = PATH_DATASET + "ArgoUML/VariantsSourceCodeComparison/manual/variants";
-	final static String PATH_DATASET_METHOD_LEVEL_GROUND_TRUTH = PATH_DATASET + "ArgoUML/VariantsSourceCodeComparison/manual/results/MethodComparison/groundTruthMethods";
-	// for running the comparisons with the runtime monitoring by unit tests use: ArgoUML\VariantsSourceCodeComparison\tests\results\groundTruthVariants
-	final static String PATH_DATASET_LINE_LEVEL_GROUND_TRUTH = PATH_DATASET + "ArgoUML/VariantsSourceCodeComparison/manual/results/groundTruthVariants";
-	
+	final static String PATH_ARGOUMLSPL_BENCHMARK = "C:\\Users\\gabil\\eclipse-workspace\\ArgoUMLSPLBenchmark";
+
+	// for running the comparisons with the runtime monitoring by unit tests use:
+	// ArgoUML\VariantsSourceCodeComparison\tests\variants\
+	final static String PATH_DATASET_EXECUTIONS = PATH_DATASET
+			+ "ArgoUML\\VariantsSourceCodeComparison\\manual\\variants";
+	final static String PATH_DATASET_METHOD_LEVEL_GROUND_TRUTH = PATH_DATASET
+			+ "ArgoUML\\VariantsSourceCodeComparison\\manual\\results\\MethodComparison\\groundTruthMethods";
+	// for running the comparisons with the runtime monitoring by unit tests use:
+	// ArgoUML\VariantsSourceCodeComparison\tests\results\groundTruthVariants
+	final static String PATH_DATASET_LINE_LEVEL_GROUND_TRUTH = PATH_DATASET
+			+ "ArgoUML\\VariantsSourceCodeComparison\\manual\\results\\groundTruthVariants";
+
 	final static boolean ONLY_ORIGINAL_SCENARIO = true;
 
 	// e.g., michelon et al. 2021 execution dataset and groundtruth contains
@@ -45,6 +52,17 @@ public class MainSpectrum {
 			// read data set
 			Map<String, Map<String, List<Integer>>> featExec = GabrielaDatasetReader
 					.getFeatExec(PATH_DATASET_EXECUTIONS, IGNORE_NOT_ARGOUML_TRACES);
+
+			// Ratio of lines of a feature with the lines executed
+			for (Entry<String, Map<String, List<Integer>>> feat : featExec.entrySet()) {
+				System.out.println("Feature: " + feat.getKey());
+				File fileSrc = new File(
+						PATH_DATASET_EXECUTIONS + File.separator + feat.getKey() + ".config" + File.separator + "src");
+				Map<String, List<Integer>> result = DynamicFL2BenchResults.transformToAbsPathAndLines(feat.getKey(),
+						fileSrc, feat.getValue());
+				FeatureCoverage.ratioLinesFeatureLinesExecuted(result, feat.getKey(),
+						PATH_DATASET_LINE_LEVEL_GROUND_TRUTH, PATH_DATASET_EXECUTIONS);
+			}
 
 			long start = System.currentTimeMillis();
 
@@ -65,7 +83,8 @@ public class MainSpectrum {
 				// scenario, feature, (precision, recall, f1, classPrecision, classRecall,
 				// classF1, methodPrecision, methodRecall, methodF1)
 				Map<String, Map<String, List<Double>>> result = DynamicFL2BenchResults.compute(
-						PATH_ARGOUMLSPL_BENCHMARK, PATH_DATASET_METHOD_LEVEL_GROUND_TRUTH, PATH_DATASET_LINE_LEVEL_GROUND_TRUTH, PATH_DATASET_EXECUTIONS, results, output,
+						PATH_ARGOUMLSPL_BENCHMARK, PATH_DATASET_METHOD_LEVEL_GROUND_TRUTH,
+						PATH_DATASET_LINE_LEVEL_GROUND_TRUTH, PATH_DATASET_EXECUTIONS, results, output,
 						ONLY_ORIGINAL_SCENARIO);
 
 				System.out.println("\n6 Diagram features");
