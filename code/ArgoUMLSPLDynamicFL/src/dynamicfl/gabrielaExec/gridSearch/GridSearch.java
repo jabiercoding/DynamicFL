@@ -45,7 +45,7 @@ public class GridSearch implements Iterable<Configuration> {
 	List<AbstractSpectrumBasedFaultLocalizer<String>> algos;
 	List<Double> thresholds;
 	Queue<Configuration> configurations;
-	int num_trials = 4;
+	int num_trials = 2;
 
 	public GridSearch() {
 		initializeAlgorithms();
@@ -72,8 +72,8 @@ public class GridSearch implements Iterable<Configuration> {
 //		algos.add(new Kulczynski2<String>());
 //		algos.add(new M1<String>());
 //		algos.add(new M2<String>());
-		algos.add(new Ochiai<String>());
-		algos.add(new Ochiai2<String>());
+//		algos.add(new Ochiai<String>());
+//		algos.add(new Ochiai2<String>());
 //		algos.add(new Overlap<String>());
 //		algos.add(new RogersTanimoto<String>());
 //		algos.add(new Rogot1<String>());

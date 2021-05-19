@@ -16,23 +16,25 @@ public class MainSpectrum {
 	// Dataset from https://zenodo.org/record/4262529
 	// C:\Users\gabil\Downloads\Dataset\Dataset
 	// C:/Users/106836/Downloads/Dataset
-	final static String PATH_DATASET = "C:\\Users\\gabil\\Downloads\\Dataset\\";
+	// /Users/brunomachado/DocumentsOffline/DynamicFL4/Dataset
+	final static String PATH_DATASET = "/Users/brunomachado/DocumentsOffline/DynamicFL4/Dataset";
 
 	// https://github.com/but4reuse/argouml-spl-benchmark
 	// C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark
 	// C:\\Users\\gabil\\eclipse-workspace\\ArgoUMLSPLBenchmark
-	final static String PATH_ARGOUMLSPL_BENCHMARK = "C:\\Users\\gabil\\eclipse-workspace\\ArgoUMLSPLBenchmark";
+	// /Users/brunomachado/DocumentsOffline/DynamicFL4/ArgoUMLSPLBenchmark
+	final static String PATH_ARGOUMLSPL_BENCHMARK = "/Users/brunomachado/DocumentsOffline/DynamicFL4/ArgoUMLSPLBenchmark";
 
 	// for running the comparisons with the runtime monitoring by unit tests use:
 	// ArgoUML\VariantsSourceCodeComparison\tests\variants\
-	final static String PATH_DATASET_EXECUTIONS = PATH_DATASET
-			+ "ArgoUML\\VariantsSourceCodeComparison\\manual\\variants";
-	final static String PATH_DATASET_METHOD_LEVEL_GROUND_TRUTH = PATH_DATASET
-			+ "ArgoUML\\VariantsSourceCodeComparison\\manual\\results\\MethodComparison\\groundTruthMethods";
+	final static String PATH_DATASET_EXECUTIONS = PATH_DATASET + File.separator
+			+ "ArgoUML" + File.separator + "VariantsSourceCodeComparison" + File.separator + "manual" + File.separator + "variants";
+	final static String PATH_DATASET_METHOD_LEVEL_GROUND_TRUTH = PATH_DATASET + File.separator
+			+ "ArgoUML" + File.separator + "VariantsSourceCodeComparison" + File.separator + "manual" + File.separator + "results" + File.separator + "MethodComparison" + File.separator + "groundTruthMethods";
 	// for running the comparisons with the runtime monitoring by unit tests use:
 	// ArgoUML\VariantsSourceCodeComparison\tests\results\groundTruthVariants
-	final static String PATH_DATASET_LINE_LEVEL_GROUND_TRUTH = PATH_DATASET
-			+ "ArgoUML\\VariantsSourceCodeComparison\\manual\\results\\groundTruthVariants";
+	final static String PATH_DATASET_LINE_LEVEL_GROUND_TRUTH = PATH_DATASET + File.separator
+			+ "ArgoUML" + File.separator + "VariantsSourceCodeComparison" + File.separator + "manual" + File.separator + "results" + File.separator + "groundTruthVariants";
 
 	final static boolean ONLY_ORIGINAL_SCENARIO = true;
 
@@ -41,14 +43,16 @@ public class MainSpectrum {
 	// see GroundTruthExtractor.getAllArgoUMLSPLRelevantJavaFiles
 	// Use IGNORE=false for a fair comparison with Michelon et al. 2021 and false
 	// otherwise
-	final static boolean IGNORE_NOT_ARGOUML_TRACES = false;
+	final static boolean IGNORE_NOT_ARGOUML_TRACES = true;
 
 	public static void main(String[] args) {
 
 		try {
 
 			File mainOutput = new File("output/output_" + System.currentTimeMillis());
-
+			
+			System.out.println(PATH_DATASET_EXECUTIONS);
+			System.out.println(PATH_DATASET_METHOD_LEVEL_GROUND_TRUTH);
 			// read data set
 			Map<String, Map<String, List<Integer>>> featExec = GabrielaDatasetReader
 					.getFeatExec(PATH_DATASET_EXECUTIONS, IGNORE_NOT_ARGOUML_TRACES);
@@ -92,10 +96,8 @@ public class MainSpectrum {
 				double avgRecall = DynamicFL2BenchResults.getAvgRecall(result);
 				double avgF1 = DynamicFL2BenchResults.getAvgF1(result);
 
-				scores.add(conf.algo.getName(), Double.toString(conf.threshold_sbfl), "Precision", avgPrecision);
-				scores.add(conf.algo.getName(), Double.toString(conf.threshold_sbfl), "Recall", avgRecall);
-				scores.add(conf.algo.getName(), Double.toString(conf.threshold_sbfl), "F1", avgF1);
-
+				scores.add(conf.algo.getName(), Double.toString(conf.threshold_sbfl), avgPrecision, avgRecall, avgF1);
+				
 				System.out.println("Avg. Precision:\t" + avgPrecision);
 				System.out.println("Avg. Recall:\t" + avgRecall);
 				System.out.println("Avg. F1:\t" + avgF1);
