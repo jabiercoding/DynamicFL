@@ -28,20 +28,8 @@ import utils.TraceIdUtils;
  */
 public class LineTraces2BenchFormat {
 
-	// greater or equal will be considered whole class (without Refinement)
-	public static final double THRESHOLD_GLOBAL_CLASS_LINES_PERCENTAGE = 0.5;
-
-	// greater or equal will be considered whole class (without Refinement)
-	public static final double THRESHOLD_METHODS_PERCENTAGE = 0.75;
-	// but only classes with greater or equal number of methods
-	public static final double THRESHOLD_METHODS_TO_CALCULATE_PERCENTAGE = 1;
-
-	// less will be considered Refinement, greater or equal will be considered the
-	// whole method (without Refinement)
-	public static final double THRESHOLD_METHOD_LINES_PERCENTAGE = 0.5;
-
 	/**
-	 * Create benchmark string
+	 * Create benchmark string with predefined hard-coded thresholds
 	 * 
 	 * @param scenarioPath
 	 * @param feature
@@ -50,6 +38,38 @@ public class LineTraces2BenchFormat {
 	 */
 	public static List<String> getResultsInBenchmarkFormat(Map<String, List<Integer>> classAndLines, String feature,
 			FeatureUtils fUtils, File originalArgoUMLsrc, boolean crossVariantsCheck) {
+		return getResultsInBenchmarkFormat(classAndLines, feature, fUtils, originalArgoUMLsrc, crossVariantsCheck, 0.25,
+				0.25, 1, 0.25);
+	}
+
+	/**
+	 * Create benchmark string
+	 * 
+	 * @param classAndLines
+	 * @param feature
+	 * @param fUtils
+	 * @param originalArgoUMLsrc
+	 * @param crossVariantsCheck                        use for benchmark scenarios
+	 *                                                  with more than one variant
+	 * @param THRESHOLD_GLOBAL_CLASS_LINES_PERCENTAGE   greater or equal will be
+	 *                                                  considered whole class
+	 *                                                  (without Refinement)
+	 * @param THRESHOLD_METHODS_PERCENTAGE              greater or equal will be
+	 *                                                  considered whole class
+	 *                                                  (without Refinement)
+	 * @param THRESHOLD_METHODS_TO_CALCULATE_PERCENTAGE but only classes with
+	 *                                                  greater or equal number of
+	 *                                                  methods
+	 * @param THRESHOLD_METHOD_LINES_PERCENTAGE         less will be considered
+	 *                                                  Refinement, greater or equal
+	 *                                                  will be considered the whole
+	 *                                                  method (without Refinement)
+	 * @return
+	 */
+	public static List<String> getResultsInBenchmarkFormat(Map<String, List<Integer>> classAndLines, String feature,
+			FeatureUtils fUtils, File originalArgoUMLsrc, boolean crossVariantsCheck,
+			double THRESHOLD_GLOBAL_CLASS_LINES_PERCENTAGE, double THRESHOLD_METHODS_PERCENTAGE,
+			double THRESHOLD_METHODS_TO_CALCULATE_PERCENTAGE, double THRESHOLD_METHOD_LINES_PERCENTAGE) {
 
 		List<String> results = new ArrayList<String>();
 
