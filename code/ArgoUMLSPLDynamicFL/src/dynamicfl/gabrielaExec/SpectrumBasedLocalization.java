@@ -1,6 +1,8 @@
 package dynamicfl.gabrielaExec;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -8,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import fk.stardust.localizer.IFaultLocalizer;
+import fk.stardust.localizer.NormalizedRanking;
+import fk.stardust.localizer.NormalizedRanking.NormalizationStrategy;
 import fk.stardust.localizer.Ranking;
 import fk.stardust.traces.INode;
 import fk.stardust.traces.ISpectra;
@@ -40,10 +44,12 @@ public class SpectrumBasedLocalization {
 				// no expansion
 				Map<String, Map<String, List<Integer>>> featExec2 = featExec;
 				// targeted expansion
-				// Map<String, Map<String, List<Integer>>> featExec2 = targetedExpandWith2Wise(feature, featExec);
+				// Map<String, Map<String, List<Integer>>> featExec2 =
+				// targetedExpandWith2Wise(feature, featExec);
 				// global expansion
-				// Map<String, Map<String, List<Integer>>> featExec2 = globalExpandWith2Wise(featExec);
-				
+				// Map<String, Map<String, List<Integer>>> featExec2 =
+				// globalExpandWith2Wise(featExec);
+
 				// prepare results
 				Map<String, List<Integer>> featResults = new LinkedHashMap<String, List<Integer>>();
 				results.put(feature, featResults);
@@ -54,19 +60,24 @@ public class SpectrumBasedLocalization {
 				// System.out.println(getCSV(spectra));
 				IFaultLocalizer<String> localizer = algo;
 				Ranking<String> ranking = localizer.localize(spectra);
+				NormalizedRanking<String> normalizedRanking = new NormalizedRanking<String>(ranking,
+						NormalizationStrategy.ZeroOne);
 
 				if (output != null) {
 					File featRankingFile = new File(output, localizer.getName() + "/" + feature + "_ranking.txt");
+					File featNormRankingFile = new File(output,
+							localizer.getName() + "/" + feature + "_normalized_ranking.txt");
 					featRankingFile.getParentFile().mkdirs();
 					ranking.save(featRankingFile.getAbsolutePath());
+					saveNormalizedRanking(featNormRankingFile.getAbsolutePath(), normalizedRanking);
 				}
 
 				// Add to the results if greater or equal to the threshold
 				System.out.println("Creating ranking for " + feature);
-				Iterator<INode<String>> i = ranking.iterator();
+				Iterator<INode<String>> i = normalizedRanking.iterator();
 				while (i.hasNext()) {
 					INode<String> node = i.next();
-					double suspiciousness = ranking.getSuspiciousness(node);
+					double suspiciousness = normalizedRanking.getSuspiciousness(node);
 					if (suspiciousness >= threshold_sbfl) {
 						// System.out.println(node.getIdentifier() + " " + suspiciousness);
 						String className = node.getIdentifier().split(";")[0];
@@ -184,9 +195,10 @@ public class SpectrumBasedLocalization {
 		}
 		return expandedResult;
 	}
-	
+
 	/**
 	 * get a stringbuffer of the spectra
+	 * 
 	 * @param spectra
 	 * @return stringbuffer
 	 */
@@ -210,6 +222,33 @@ public class SpectrumBasedLocalization {
 			buffer.append("\n");
 		}
 		return buffer;
+	}
+
+	/**
+	 * It saves the normalized ranking. Ranking.save() cannot be used because of
+	 * this issue https://github.com/FaKeller/stardust/issues/2
+	 * 
+	 * @param filename
+	 * @param ranking
+	 * @throws IOException
+	 */
+	public static void saveNormalizedRanking(String filename, Ranking<String> ranking) throws IOException {
+		FileWriter writer = null;
+		try {
+			writer = new FileWriter(filename);
+			Iterator<INode<String>> i = ranking.iterator();
+			while (i.hasNext()) {
+				INode<String> el = i.next();
+				writer.write(String.format("%s: %f\n", el.toString(), ranking.getSuspiciousness(el)));
+			}
+		} catch (final Exception e) {
+			throw new RuntimeException("Saving the ranking failed.", e);
+		} finally {
+			if (writer != null) {
+				writer.flush();
+				writer.close();
+			}
+		}
 	}
 
 }
