@@ -1,6 +1,7 @@
 package dynamicfl.gabrielaExec.gridSearch;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -92,13 +93,14 @@ public class GridSearch implements Iterable<Configuration> {
 	}
 
 	private void generateThresholds() {
-		thresholds = new ArrayList<>();
-		double step = (1.0 / num_trials);
-		for (int trial = 0; trial < num_trials; trial++) {
-			double threshold = trial * step;
-			// (1 - threshold) so we start with 1 and then we go descending
-			thresholds.add(1 - threshold);
-		}
+		thresholds = Arrays.asList(1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1);
+//		thresholds = new ArrayList<>();
+//		double step = (1.0 / num_trials);
+//		for (int trial = 0; trial < num_trials; trial++) {
+//			double threshold = trial * step;
+//			// (1 - threshold) so we start with 1 and then we go descending
+//			thresholds.add(1 - threshold);
+//		}
 	}
 
 	private void populateConfigurations() {
