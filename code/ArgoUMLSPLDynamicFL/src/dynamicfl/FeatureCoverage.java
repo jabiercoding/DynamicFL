@@ -73,7 +73,7 @@ public class FeatureCoverage {
 						.replaceAll(" ", "");
 				if (!sCurrentLine.equals("") && !sCurrentLine.startsWith("//") && !sCurrentLine.startsWith("/*")
 						&& !sCurrentLine.startsWith("*/") && !sCurrentLine.startsWith("*")
-						&& !sCurrentLine.startsWith("import") && !sCurrentLine.equals("}")
+						&& !sCurrentLine.startsWith("import") && !sCurrentLine.startsWith("package") && !sCurrentLine.equals("}")
 						&& !sCurrentLine.equals("{")) {
 					linesRetrieved.add(sCurrentLine);
 				}
@@ -93,7 +93,7 @@ public class FeatureCoverage {
 					sCurrentLine = sCurrentLine.trim().replaceAll("\t", "").replaceAll("\r", "").replaceAll(" ", "");
 					if (!sCurrentLine.equals("") && !sCurrentLine.startsWith("//") && !sCurrentLine.startsWith("/*")
 							&& !sCurrentLine.startsWith("*/") && !sCurrentLine.startsWith("*")
-							&& !sCurrentLine.startsWith("import") && !sCurrentLine.equals("}")
+							&& !sCurrentLine.startsWith("import") && !sCurrentLine.startsWith("package") && !sCurrentLine.equals("}")
 							&& !sCurrentLine.equals("{")) {
 						linesFeature.add(sCurrentLine);
 					}
@@ -115,7 +115,7 @@ public class FeatureCoverage {
 					sCurrentLine = sCurrentLine.trim().replaceAll("\t", "").replaceAll("\r", "").replaceAll(" ", "");
 					if (!sCurrentLine.equals("") && !sCurrentLine.startsWith("//") && !sCurrentLine.startsWith("/*")
 							&& !sCurrentLine.startsWith("*/") && !sCurrentLine.startsWith("*")
-							&& !sCurrentLine.startsWith("import") && !sCurrentLine.equals("}")
+							&& !sCurrentLine.startsWith("import") && !sCurrentLine.startsWith("package") && !sCurrentLine.equals("}")
 							&& !sCurrentLine.equals("{")) {
 						linesBASE.add(sCurrentLine);
 					}

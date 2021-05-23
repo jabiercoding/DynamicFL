@@ -22,13 +22,13 @@ public class MainSpectrum {
 	// C:\Users\gabil\Downloads\Dataset\Dataset
 	// C:/Users/106836/Downloads/Dataset
 	// /Users/brunomachado/DocumentsOffline/DynamicFL4/Dataset
-	final static String PATH_DATASET = "/Users/brunomachado/DocumentsOffline/DynamicFL4/Dataset";
+	final static String PATH_DATASET = "C:\\Users\\gabil\\Downloads\\Dataset\\Dataset";
 
 	// https://github.com/but4reuse/argouml-spl-benchmark
 	// C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark
 	// C:\\Users\\gabil\\eclipse-workspace\\ArgoUMLSPLBenchmark
 	// /Users/brunomachado/DocumentsOffline/DynamicFL4/ArgoUMLSPLBenchmark
-	final static String PATH_ARGOUMLSPL_BENCHMARK = "/Users/brunomachado/DocumentsOffline/DynamicFL4/ArgoUMLSPLBenchmark";
+	final static String PATH_ARGOUMLSPL_BENCHMARK = " C:\\\\Users\\\\gabil\\\\eclipse-workspace\\\\ArgoUMLSPLBenchmark";
 
 	// for running the comparisons with the runtime monitoring by unit tests use:
 	// ArgoUML\VariantsSourceCodeComparison\tests\variants\
