@@ -1,15 +1,20 @@
 package dynamicfl.scores;
 
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import dynamicfl.granularity.Granularity;
 
+/**
+ * Data class that holds a collection of three scores (Values) based on the level of granularity.
+ * @author brunomachado
+ */
 public class ScoreTriplet {
 	
 	HashMap<Granularity, Values> values;
 	
 	
+	/**
+	 * Data class containing three scores: Precision, Recall and F1
+	 */
 	class Values {
 		public String precision;
 		public String recall;
@@ -27,14 +32,7 @@ public class ScoreTriplet {
 	}
 	
 	public void add(Granularity granularity, double precision, double recall, double f1) {
-		this.values.put(granularity, new Values(round(precision), round(recall), round(f1)));
-	}
-	
-	private String round(double value) {
-		DecimalFormat df = new DecimalFormat("#.###");
-		df.setRoundingMode(RoundingMode.CEILING);
-		return df.format(value);
-		
+		this.values.put(granularity, new Values(Double.toString(precision), Double.toString(recall), Double.toString(f1)));
 	}
 	
 	public String getPrecision(Granularity granularity) {

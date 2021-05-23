@@ -1,7 +1,8 @@
 package dynamicfl.gabrielaExec.gridSearch;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,6 +43,13 @@ import fk.stardust.localizer.sbfl.Wong2;
 import fk.stardust.localizer.sbfl.Wong3;
 import fk.stardust.localizer.sbfl.Zoltar;
 
+/**
+ * This class enables a brute force exploration of algorithms and thresholds in the FL calculation.
+ * 
+ * It generates and iterates each configuration for the Dynamic Feature localisation calculation.
+ * A configuration includes a specific spectrum based fault localisation algorithm and a threshold.
+ * @author brunomachado
+ */
 public class GridSearch implements Iterable<Configuration> {
 	List<AbstractSpectrumBasedFaultLocalizer<String>> algos;
 	List<Double> thresholds;
@@ -92,16 +100,29 @@ public class GridSearch implements Iterable<Configuration> {
 
 	}
 
+	/*
+	 * Based on the number of trials (N), it will generate equidistant N thresholds between 0 and 1.
+	 * 
+	 *  Example:
+	 *  If number of trials is (10), 
+	 *  	it will generate { 1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1 }
+	 */
 	private void generateThresholds() {
-		thresholds = Arrays.asList(1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1);
-//		thresholds = new ArrayList<>();
-//		double step = (1.0 / num_trials);
-//		for (int trial = 0; trial < num_trials; trial++) {
-//			double threshold = trial * step;
-//			// (1 - threshold) so we start with 1 and then we go descending
-//			thresholds.add(1 - threshold);
-//		}
+//		thresholds = Arrays.asList(1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1);
+		this.thresholds = new ArrayList<>();
+		double step = (1.0 / num_trials);
+		for (int trial = 0; trial < num_trials; trial++) {
+			double threshold = trial * step;
+			// (1 - threshold) so we start with 1 and then we go descending
+			this.thresholds.add(round(1 - threshold));
+		}
 	}
+
+	private Double round(Double value) {
+		DecimalFormat df = new DecimalFormat("#.#");
+		df.setRoundingMode(RoundingMode.HALF_UP);
+		return Double.parseDouble(df.format(value));
+	}	
 
 	private void populateConfigurations() {
 		configurations = new LinkedList<>();
