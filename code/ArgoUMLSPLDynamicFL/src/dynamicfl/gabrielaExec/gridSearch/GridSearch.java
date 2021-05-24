@@ -2,10 +2,12 @@ package dynamicfl.gabrielaExec.gridSearch;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Queue;
 
 import fk.stardust.localizer.sbfl.AbstractSpectrumBasedFaultLocalizer;
@@ -64,6 +66,7 @@ public class GridSearch implements Iterable<Configuration> {
 
 	private void initializeAlgorithms() {
 		algos = new ArrayList<>();
+		
 		algos.add(new Ample<String>());
 		algos.add(new Anderberg<String>());
 		algos.add(new ArithmeticMean<String>());
@@ -97,7 +100,6 @@ public class GridSearch implements Iterable<Configuration> {
 		algos.add(new Wong2<String>());
 		algos.add(new Wong3<String>());
 		algos.add(new Zoltar<String>());
-
 	}
 
 	/*
@@ -108,21 +110,24 @@ public class GridSearch implements Iterable<Configuration> {
 	 *  	it will generate { 1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1 }
 	 */
 	private void generateThresholds() {
-//		thresholds = Arrays.asList(1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1);
 		this.thresholds = new ArrayList<>();
 		double step = (1.0 / num_trials);
 		for (int trial = 0; trial < num_trials; trial++) {
 			double threshold = trial * step;
 			// (1 - threshold) so we start with 1 and then we go descending
-			this.thresholds.add(round(1 - threshold));
+			threshold = round(1 - threshold);
+			this.thresholds.add(threshold);
 		}
 	}
 
 	private Double round(Double value) {
-		DecimalFormat df = new DecimalFormat("#.#");
+		// locale is used to avoid that comma is used for decimals instead of dots
+		DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
+		DecimalFormat df = new DecimalFormat("#.#", symbols);
 		df.setRoundingMode(RoundingMode.HALF_UP);
-		return Double.parseDouble(df.format(value));
-	}	
+		String roundNum = df.format(value);
+		return Double.parseDouble(roundNum);
+	}
 
 	private void populateConfigurations() {
 		configurations = new LinkedList<>();
