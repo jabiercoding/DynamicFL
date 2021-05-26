@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
 
-import fk.stardust.localizer.sbfl.AbstractSpectrumBasedFaultLocalizer;
+import fk.stardust.localizer.IFaultLocalizer;
 import fk.stardust.localizer.sbfl.Ample;
 import fk.stardust.localizer.sbfl.Anderberg;
 import fk.stardust.localizer.sbfl.ArithmeticMean;
@@ -53,7 +53,7 @@ import fk.stardust.localizer.sbfl.Zoltar;
  * @author brunomachado
  */
 public class GridSearch implements Iterable<Configuration> {
-	List<AbstractSpectrumBasedFaultLocalizer<String>> algos;
+	List<IFaultLocalizer<String>> algos;
 	List<Double> thresholds;
 	Queue<Configuration> configurations;
 	int num_trials = 10;
@@ -131,7 +131,7 @@ public class GridSearch implements Iterable<Configuration> {
 
 	private void populateConfigurations() {
 		configurations = new LinkedList<>();
-		for (AbstractSpectrumBasedFaultLocalizer<String> algo : algos) {
+		for (IFaultLocalizer<String> algo : algos) {
 			for (Double threshold_sbfl : thresholds) {
 				configurations.add(new Configuration(algo, threshold_sbfl));
 			}
@@ -141,6 +141,10 @@ public class GridSearch implements Iterable<Configuration> {
 	@Override
 	public Iterator<Configuration> iterator() {
 		return configurations.iterator();
+	}
+	
+	public List<IFaultLocalizer<String>> getAlgorithms(){
+		return algos;
 	}
 
 }
