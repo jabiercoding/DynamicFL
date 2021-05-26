@@ -181,7 +181,7 @@ public class MetricsModule {
 							pathToLineLevelGroundTruth, pathToOriginalVariant, fUtils, outputScenarioLine, true);
 
 					// Metrics
-					System.out.println("Official Metrics");
+					System.out.println("Official Benchmark Metrics");
 					if (!featureGroundTruthFile.exists()) {
 						System.out.println(
 								"Results found for " + currentFeature + " but it does not exist in the GroundTruth");
@@ -197,7 +197,7 @@ public class MetricsModule {
 						resultFeature.add(recall);
 						resultFeature.add(f1);
 
-						System.out.println("\nUnofficial Class level metrics");
+						System.out.println("\nClass level metrics");
 						List<String> groundTruth2 = convertBenchTracesToClassLevel(groundTruth);
 						List<String> results2 = convertBenchTracesToClassLevel(results);
 						double precision2 = MetricsCalculation.getPrecision(groundTruth2, results2);
