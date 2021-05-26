@@ -6,6 +6,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ArgoUMLSPLBenchmark"/>
 	<classpathentry kind="lib" path="/ArgoUMLSPLBenchmark/libs/org.eclipse.core.commands_3.7.0.v20150422-0725.jar"/>
 	<classpathentry kind="lib" path="/ArgoUMLSPLBenchmark/libs/org.eclipse.core.contenttype_3.5.0.v20150421-2214.jar"/>
@@ -18,5 +19,6 @@
 	<classpathentry kind="lib" path="/ArgoUMLSPLBenchmark/libs/org.eclipse.osgi_3.10.100.v20150529-1857.jar"/>
 	<classpathentry kind="lib" path="libs/FaKeller_stardust.jar"/>
 	<classpathentry kind="lib" path="libs/java-diff-utils-2.2.0.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
