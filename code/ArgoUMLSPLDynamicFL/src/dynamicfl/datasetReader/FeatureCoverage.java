@@ -75,8 +75,8 @@ public class FeatureCoverage {
 						.replaceAll(" ", "");
 				if (!sCurrentLine.equals("") && !sCurrentLine.startsWith("//") && !sCurrentLine.startsWith("/*")
 						&& !sCurrentLine.startsWith("*/") && !sCurrentLine.startsWith("*")
-						&& !sCurrentLine.startsWith("import") && !sCurrentLine.startsWith("package") && !sCurrentLine.equals("}")
-						&& !sCurrentLine.equals("{")) {
+						&& !sCurrentLine.startsWith("import") && !sCurrentLine.startsWith("package")
+						&& !sCurrentLine.equals("}") && !sCurrentLine.equals("{")) {
 					linesRetrieved.add(sCurrentLine);
 				}
 			}
@@ -95,8 +95,8 @@ public class FeatureCoverage {
 					sCurrentLine = sCurrentLine.trim().replaceAll("\t", "").replaceAll("\r", "").replaceAll(" ", "");
 					if (!sCurrentLine.equals("") && !sCurrentLine.startsWith("//") && !sCurrentLine.startsWith("/*")
 							&& !sCurrentLine.startsWith("*/") && !sCurrentLine.startsWith("*")
-							&& !sCurrentLine.startsWith("import") && !sCurrentLine.startsWith("package") && !sCurrentLine.equals("}")
-							&& !sCurrentLine.equals("{")) {
+							&& !sCurrentLine.startsWith("import") && !sCurrentLine.startsWith("package")
+							&& !sCurrentLine.equals("}") && !sCurrentLine.equals("{")) {
 						linesFeature.add(sCurrentLine);
 					}
 				}
@@ -117,8 +117,8 @@ public class FeatureCoverage {
 					sCurrentLine = sCurrentLine.trim().replaceAll("\t", "").replaceAll("\r", "").replaceAll(" ", "");
 					if (!sCurrentLine.equals("") && !sCurrentLine.startsWith("//") && !sCurrentLine.startsWith("/*")
 							&& !sCurrentLine.startsWith("*/") && !sCurrentLine.startsWith("*")
-							&& !sCurrentLine.startsWith("import") && !sCurrentLine.startsWith("package") && !sCurrentLine.equals("}")
-							&& !sCurrentLine.equals("{")) {
+							&& !sCurrentLine.startsWith("import") && !sCurrentLine.startsWith("package")
+							&& !sCurrentLine.equals("}") && !sCurrentLine.equals("{")) {
 						linesBASE.add(sCurrentLine);
 					}
 				}
@@ -128,6 +128,144 @@ public class FeatureCoverage {
 		}
 
 		intersectionVariants(filesBASEVariant, filesFeatureVariant, filesRetrieved);
+	}
+
+	/**
+	 * Computes the ratio of lines of a feature and lines executed for all features
+	 * 
+	 * @param linesExecAllFeatures
+	 * @param path
+	 *            to the ground truth variant of each feature
+	 * @param path
+	 *            to the ground truth original variant Key set is the absolute path
+	 *            to each Java file
+	 * @throws IOException
+	 */
+	public static void ratioLinesFeatureAllFeaturesLinesExecuted(
+			Map<String, Map<String, List<Integer>>> linesExecAllFeatures, String pathToLineLevelGroundTruth,
+			String pathToOriginalVariant) throws IOException {
+
+		for (Map.Entry<String, Map<String, List<Integer>>> featExec : linesExecAllFeatures.entrySet()) {
+			
+			System.out.println("Ratio of All features lines executed to the feature: "+ featExec.getKey());
+
+			File variantFeatureGT = new File(pathToLineLevelGroundTruth, featExec.getKey().toUpperCase() + ".1");
+
+			File variantBASE = new File(pathToLineLevelGroundTruth, "BASE.1");
+
+			Map<String, List<Integer>> javaClassAndLinesAllFeatures = new HashMap<>();
+
+			Map<File, List<String>> filesRetrieved = new HashMap<>();
+			Map<File, List<String>> filesFeatureVariant = new HashMap<>();
+			Map<File, List<String>> filesBASEVariant = new HashMap<>();
+
+			LinkedList<File> filesFeatureVariantList = new LinkedList<>();
+			LineTraces2LineComparison.getFilesToProcess(variantFeatureGT, filesFeatureVariantList);
+			LinkedList<File> filesBASEVariantList = new LinkedList<>();
+			LineTraces2LineComparison.getFilesToProcess(variantBASE, filesBASEVariantList);
+
+			// add lines of files existing in a feature variant (contains BASE code)
+			List<String> linesFeature = new ArrayList<>();
+			for (File f : filesFeatureVariantList) {
+				if (!f.isDirectory()) {
+					File filenew = new File(String.valueOf(f.toPath()));
+					linesFeature = new ArrayList<>();
+					BufferedReader br = new BufferedReader(new FileReader(filenew.getAbsoluteFile()));
+					String sCurrentLine;
+					while ((sCurrentLine = br.readLine()) != null) {
+						sCurrentLine = sCurrentLine.trim().replaceAll("\t", "").replaceAll("\r", "").replaceAll(" ",
+								"");
+						if (!sCurrentLine.equals("") && !sCurrentLine.startsWith("//") && !sCurrentLine.startsWith("/*")
+								&& !sCurrentLine.startsWith("*/") && !sCurrentLine.startsWith("*")
+								&& !sCurrentLine.startsWith("import") && !sCurrentLine.startsWith("package")
+								&& !sCurrentLine.equals("}") && !sCurrentLine.equals("{")) {
+							linesFeature.add(sCurrentLine);
+						}
+					}
+					br.close();
+					filesFeatureVariant.put(f, linesFeature);
+				}
+			}
+
+			// add lines of files existing in a variant containing only the BASE code
+			List<String> linesBASE = new ArrayList<>();
+			for (File f : filesBASEVariantList) {
+				if (!f.isDirectory()) {
+					File filenew = new File(String.valueOf(f.toPath()));
+					linesBASE = new ArrayList<>();
+					BufferedReader br = new BufferedReader(new FileReader(filenew.getAbsoluteFile()));
+					String sCurrentLine;
+					while ((sCurrentLine = br.readLine()) != null) {
+						sCurrentLine = sCurrentLine.trim().replaceAll("\t", "").replaceAll("\r", "").replaceAll(" ",
+								"");
+						if (!sCurrentLine.equals("") && !sCurrentLine.startsWith("//") && !sCurrentLine.startsWith("/*")
+								&& !sCurrentLine.startsWith("*/") && !sCurrentLine.startsWith("*")
+								&& !sCurrentLine.startsWith("import") && !sCurrentLine.startsWith("package")
+								&& !sCurrentLine.equals("}") && !sCurrentLine.equals("{")) {
+							linesBASE.add(sCurrentLine);
+						}
+					}
+					br.close();
+					filesBASEVariant.put(f, linesBASE);
+				}
+			}
+
+			String dirAux = "";
+			for (Map.Entry<String, Map<String, List<Integer>>> featExecLines : linesExecAllFeatures.entrySet()) {
+				Map<String, List<Integer>> featMap = featExecLines.getValue();
+				for (Map.Entry<String, List<Integer>> featClassAndLines : featMap.entrySet()) {
+					if(dirAux.equals(""))
+						dirAux = featClassAndLines.getKey().substring(0,featClassAndLines.getKey().indexOf("org" + File.separator) + 4);
+					String javaClassName = featClassAndLines.getKey().substring(featClassAndLines.getKey().indexOf("org" + File.separator) + 4);
+					if (javaClassAndLinesAllFeatures.get(javaClassName) != null) {
+						List<Integer> lineNumbers = featClassAndLines.getValue();
+						lineNumbers.removeAll(javaClassAndLinesAllFeatures.get(javaClassName));
+						List<Integer> lineNumbersMap = javaClassAndLinesAllFeatures.get(javaClassName);
+						lineNumbersMap.addAll(lineNumbers);
+						javaClassAndLinesAllFeatures.computeIfPresent(javaClassName,
+								(key, val) -> lineNumbersMap);
+					} else {
+						List<Integer> lineNumbers = featClassAndLines.getValue();
+						javaClassAndLinesAllFeatures.put(javaClassName, lineNumbers);
+					}
+				}
+			}
+
+			// for each class of the results
+			for (Map.Entry<String, List<Integer>> javaClass : javaClassAndLinesAllFeatures.entrySet()) {
+
+				File retrievedFile = new File(dirAux + javaClass.getKey());
+				List<String> linesRetrieved = new ArrayList<>();
+				List<String> bufferRetrievedFile = new ArrayList<>();
+
+				List<Integer> lines = javaClass.getValue();
+				Collections.sort(lines);
+
+				// buffer to read the lines of the original variant used to exercise the feature
+				BufferedReader br = new BufferedReader(new FileReader(retrievedFile.getAbsoluteFile()));
+				String sCurrentLine;
+				while ((sCurrentLine = br.readLine()) != null) {
+					bufferRetrievedFile.add(sCurrentLine);
+				}
+				br.close();
+
+				// add to the list of retrieved lines the single lines executed when exercised
+				// the feature
+				for (int line : lines) {
+					sCurrentLine = bufferRetrievedFile.get(line - 1).trim().replaceAll("\t", "").replaceAll("\r", "")
+							.replaceAll(" ", "");
+					if (!sCurrentLine.equals("") && !sCurrentLine.startsWith("//") && !sCurrentLine.startsWith("/*")
+							&& !sCurrentLine.startsWith("*/") && !sCurrentLine.startsWith("*")
+							&& !sCurrentLine.startsWith("import") && !sCurrentLine.startsWith("package")
+							&& !sCurrentLine.equals("}") && !sCurrentLine.equals("{")) {
+						linesRetrieved.add(sCurrentLine);
+					}
+				}
+				filesRetrieved.put(retrievedFile, linesRetrieved);
+			}
+			intersectionVariants(filesBASEVariant, filesFeatureVariant, filesRetrieved);
+		}
+
 	}
 
 	/**
