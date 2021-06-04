@@ -50,6 +50,8 @@ public class FeatureCoverage {
 		LinkedList<File> filesBASEVariantList = new LinkedList<>();
 		LineTraces2LineComparison.getFilesToProcess(variantBASE, filesBASEVariantList);
 
+		int totalLinesExecutedFeature = 0;
+
 		// for each class of the results
 		for (String javaClass : linesExecFeature.keySet()) {
 
@@ -59,6 +61,7 @@ public class FeatureCoverage {
 
 			List<Integer> lines = linesExecFeature.get(javaClass);
 			Collections.sort(lines);
+			totalLinesExecutedFeature += lines.size();
 
 			// buffer to read the lines of the original variant used to exercise the feature
 			BufferedReader br = new BufferedReader(new FileReader(retrievedFile.getAbsoluteFile()));
@@ -127,6 +130,7 @@ public class FeatureCoverage {
 			}
 		}
 
+		System.out.println("ELoC: " + totalLinesExecutedFeature);
 		intersectionVariants(filesBASEVariant, filesFeatureVariant, filesRetrieved);
 	}
 
@@ -146,8 +150,8 @@ public class FeatureCoverage {
 			String pathToOriginalVariant) throws IOException {
 
 		for (Map.Entry<String, Map<String, List<Integer>>> featExec : linesExecAllFeatures.entrySet()) {
-			
-			System.out.println("Ratio of All features lines executed to the feature: "+ featExec.getKey());
+
+			System.out.println("Ratio of All features lines executed to the feature: " + featExec.getKey());
 
 			File variantFeatureGT = new File(pathToLineLevelGroundTruth, featExec.getKey().toUpperCase() + ".1");
 
@@ -214,16 +218,17 @@ public class FeatureCoverage {
 			for (Map.Entry<String, Map<String, List<Integer>>> featExecLines : linesExecAllFeatures.entrySet()) {
 				Map<String, List<Integer>> featMap = featExecLines.getValue();
 				for (Map.Entry<String, List<Integer>> featClassAndLines : featMap.entrySet()) {
-					if(dirAux.equals(""))
-						dirAux = featClassAndLines.getKey().substring(0,featClassAndLines.getKey().indexOf("org" + File.separator) + 4);
-					String javaClassName = featClassAndLines.getKey().substring(featClassAndLines.getKey().indexOf("org" + File.separator) + 4);
+					if (dirAux.equals(""))
+						dirAux = featClassAndLines.getKey().substring(0,
+								featClassAndLines.getKey().indexOf("org" + File.separator) + 4);
+					String javaClassName = featClassAndLines.getKey()
+							.substring(featClassAndLines.getKey().indexOf("org" + File.separator) + 4);
 					if (javaClassAndLinesAllFeatures.get(javaClassName) != null) {
 						List<Integer> lineNumbers = featClassAndLines.getValue();
 						lineNumbers.removeAll(javaClassAndLinesAllFeatures.get(javaClassName));
 						List<Integer> lineNumbersMap = javaClassAndLinesAllFeatures.get(javaClassName);
 						lineNumbersMap.addAll(lineNumbers);
-						javaClassAndLinesAllFeatures.computeIfPresent(javaClassName,
-								(key, val) -> lineNumbersMap);
+						javaClassAndLinesAllFeatures.computeIfPresent(javaClassName, (key, val) -> lineNumbersMap);
 					} else {
 						List<Integer> lineNumbers = featClassAndLines.getValue();
 						javaClassAndLinesAllFeatures.put(javaClassName, lineNumbers);
@@ -333,4 +338,45 @@ public class FeatureCoverage {
 		System.out.println("Ratio: " + (linesIntersection * 100) / totalLinesFeature + "%. Total Lines of the Feature: "
 				+ totalLinesFeature + ". Lines in common with the runtime traces: " + linesIntersection + ".");
 	}
+
+	public static void calculusFSLoC(Map<String, Map<String, List<Integer>>> linesExecAllFeatures) throws IOException {
+
+		// for each feature
+		for (Map.Entry<String, Map<String, List<Integer>>> featExec : linesExecAllFeatures.entrySet()) {
+			String dirFeature = "";
+			int fsloc = 0;
+			List<Integer> lineNumbers = new ArrayList<>();
+			Map<String, List<Integer>> featureExecution = new HashMap<>(featExec.getValue());
+			// compare the lines of each file executed for a feature with the files executed for the other features
+			for (Map.Entry<String, List<Integer>> featureExecutionAux : featureExecution.entrySet()) {
+				dirFeature = featureExecutionAux.getKey()
+						.substring(featureExecutionAux.getKey().indexOf("org" + File.separator) + 4);
+				lineNumbers = new ArrayList<>(featureExecutionAux.getValue());
+				// search for the same file in the traces executed for other features
+				for (Map.Entry<String, Map<String, List<Integer>>> featExecLinesAux : linesExecAllFeatures.entrySet()) {
+					// skip the feature we want to analyse
+					if (!featExecLinesAux.getKey().equals(featExec.getKey())) {
+						Map<String, List<Integer>> otherFeatureExecution = new HashMap<>(featExecLinesAux.getValue());
+						// for each file of the other feature
+						for (Map.Entry<String, List<Integer>> otherfeatureExecutionAux : otherFeatureExecution
+								.entrySet()) {
+							String dirOtherfeature = otherfeatureExecutionAux.getKey()
+									.substring(otherfeatureExecutionAux.getKey().indexOf("org" + File.separator) + 4);
+							if (dirOtherfeature.equals(dirFeature)) {
+								List<Integer> lineNumbersOtherFeature = new ArrayList<>(
+										otherfeatureExecutionAux.getValue());
+								lineNumbers.removeAll(lineNumbersOtherFeature);
+								// break;
+							}
+						}
+					}
+				}
+				// after removing the common lines from the array of a feature, we can sum up the remaining lines in the array as lines executed only for the corresponding feature
+				fsloc += lineNumbers.size();
+			}
+
+			System.out.println("FSLoC " + featExec.getKey() + ": " + fsloc);
+		}
+	}
+
 }

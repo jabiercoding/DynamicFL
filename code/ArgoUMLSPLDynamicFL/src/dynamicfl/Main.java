@@ -18,24 +18,27 @@ public class Main {
 	// C:\Users\gabil\Downloads\Dataset\Dataset
 	// C:/Users/106836/Downloads/Dataset/Dataset
 	// /Users/brunomachado/DocumentsOffline/DynamicFL4/Dataset
-	public final static String PATH_DATASET = "C:/Users/106836/Downloads/Dataset/Dataset";
+	public final static String PATH_DATASET = "C:\\Users\\gabil\\Downloads\\Dataset\\Dataset";
 
 	// https://github.com/but4reuse/argouml-spl-benchmark
 	// C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark
 	// C:\\Users\\gabil\\eclipse-workspace\\ArgoUMLSPLBenchmark
 	// /Users/brunomachado/DocumentsOffline/DynamicFL4/ArgoUMLSPLBenchmark
-	public final static String PATH_ARGOUMLSPL_BENCHMARK = "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark";
+	public final static String PATH_ARGOUMLSPL_BENCHMARK = "C:\\Users\\gabil\\eclipse-workspace\\ArgoUMLSPLBenchmark";
 
 	// for running the comparisons with the runtime monitoring by unit tests use:
 	// ArgoUML\VariantsSourceCodeComparison\tests\variants\
 	public final static String PATH_DATASET_EXECUTIONS = PATH_DATASET + File.separator
-			+ "ArgoUML" + File.separator + "VariantsSourceCodeComparison" + File.separator + "manual" + File.separator + "variants";
+			+ "ArgoUML" + File.separator + "BenchmarkTracesComparison" + File.separator + "tests" + File.separator + "variants";
+			//+ "ArgoUML" + File.separator + "VariantsSourceCodeComparison" + File.separator + "manual" + File.separator + "variants";
 	public final static String PATH_DATASET_METHOD_LEVEL_GROUND_TRUTH = PATH_DATASET + File.separator
-			+ "ArgoUML" + File.separator + "VariantsSourceCodeComparison" + File.separator + "manual" + File.separator + "results" + File.separator + "MethodComparison" + File.separator + "groundTruthMethods";
+			//+ "ArgoUML" + File.separator + "VariantsSourceCodeComparison" + File.separator + "manual" + File.separator + "results" + File.separator + "MethodComparison" + File.separator + "groundTruthMethods";
+			+ "ArgoUML" + File.separator + "VariantsSourceCodeComparison" + File.separator + "tests" + File.separator + "results" + File.separator + "MethodComparison" + File.separator + "groundTruthMethods";
 	// for running the comparisons with the runtime monitoring by unit tests use:
 	// ArgoUML\VariantsSourceCodeComparison\tests\results\groundTruthVariants
 	public final static String PATH_DATASET_LINE_LEVEL_GROUND_TRUTH = PATH_DATASET + File.separator
-			+ "ArgoUML" + File.separator + "VariantsSourceCodeComparison" + File.separator + "manual" + File.separator + "results" + File.separator + "groundTruthVariants";
+			//+ "ArgoUML" + File.separator + "VariantsSourceCodeComparison" + File.separator + "manual" + File.separator + "results" + File.separator + "groundTruthVariants";
+			+ "ArgoUML" + File.separator + "VariantsSourceCodeComparison" + File.separator + "tests" + File.separator + "results" + File.separator + "groundTruthVariants";
 
 	public final static boolean ONLY_ORIGINAL_SCENARIO = true;
 

@@ -42,7 +42,8 @@ public class LineTraces2LineComparison {
 	 * @param scenarioPath
 	 * @param feature
 	 * 
-	 * @param classAndLines. Key set is the absolute path to each Java file
+	 * @param classAndLines.
+	 *            Key set is the absolute path to each Java file
 	 * @throws IOException
 	 */
 	public static void getResultsInLineComparison(Map<String, List<Integer>> classAbsPathAndLines, String feature,
@@ -111,15 +112,15 @@ public class LineTraces2LineComparison {
 						}
 					}
 				} else {
-					if (!linesRetrieved.contains(bufferRetrievedFile.get(line - 1))) {
-						sCurrentLine = bufferRetrievedFile.get(line - 1).trim().replaceAll("\t", "")
-								.replaceAll("\r", "").replaceAll(" ", "");
-						if (!sCurrentLine.equals("") && !sCurrentLine.startsWith("//") && !sCurrentLine.startsWith("/*")
-								&& !sCurrentLine.startsWith("*/") && !sCurrentLine.startsWith("*")
-								&& !sCurrentLine.startsWith("import")) {
-							linesRetrieved.add(sCurrentLine);
+						if (!linesRetrieved.contains(bufferRetrievedFile.get(line - 1))) {
+							sCurrentLine = bufferRetrievedFile.get(line - 1).trim().replaceAll("\t", "")
+									.replaceAll("\r", "").replaceAll(" ", "");
+							if (!sCurrentLine.equals("") && !sCurrentLine.startsWith("//")
+									&& !sCurrentLine.startsWith("/*") && !sCurrentLine.startsWith("*/")
+									&& !sCurrentLine.startsWith("*") && !sCurrentLine.startsWith("import")) {
+								linesRetrieved.add(sCurrentLine);
+							}
 						}
-					}
 				}
 			}
 
