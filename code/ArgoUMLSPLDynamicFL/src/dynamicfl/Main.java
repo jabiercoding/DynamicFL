@@ -34,7 +34,7 @@ public class Main {
 	// /Users/brunomachado/DocumentsOffline/DynamicFL4/ArgoUMLSPLBenchmark
 	public final static String PATH_ARGOUMLSPL_BENCHMARK = "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark";
 
-	public final static String MANUAL_OR_TESTS = "tests"; // "manual" or "tests"
+	public final static String MANUAL_OR_TESTS = "manual"; // "manual" or "tests"
 
 	public final static String PATH_DATASET_EXECUTIONS = PATH_DATASET + File.separator + "ArgoUML" + File.separator
 			+ "VariantsSourceCodeComparison" + File.separator + MANUAL_OR_TESTS + File.separator + "variants";
