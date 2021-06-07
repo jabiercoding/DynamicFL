@@ -28,22 +28,22 @@ import metricsCalculation.MetricsCalculation;
 import utils.FeatureUtils;
 import utils.FileUtils;
 
+/**
+ * MetricsModule calculates the results using different approaches.
+ */
 public class MetricsModule {
-	
+
 	static List<Granularity> granularities;
-	
+
 	public static void setGranularities(Granularity... givenGranularities) {
 		granularities = new ArrayList<Granularity>();
 		for (Granularity granularity : givenGranularities) {
 			granularities.add(granularity);
 		}
 	}
-	
+
 	public static void setDefaultGranularities() {
-		MetricsModule.setGranularities(
-				new OfficialResultsGranularity(),
-				new ClassGranularity(),
-				new LineGranularity(),
+		MetricsModule.setGranularities(new OfficialResultsGranularity(), new ClassGranularity(), new LineGranularity(),
 				new MethodGranularity());
 	}
 
@@ -52,8 +52,8 @@ public class MetricsModule {
 	/**
 	 * Compute results
 	 * 
-	 * @param pathToArgoUMLSPLBenchmark
-	 *            e.g., "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark"
+	 * @param pathToArgoUMLSPLBenchmark e.g.,
+	 *                                  "C:/git/argouml-spl-benchmark/ArgoUMLSPLBenchmark"
 	 * @return map of scenario, feature, (precision, recall, f1, classPrecision,
 	 *         classRecall, classF1)
 	 * @throws IOException
@@ -136,11 +136,9 @@ public class MetricsModule {
 
 					Map<String, List<Integer>> absPathAndLines = transformToAbsPathAndLines(currentFeature,
 							pathToOriginalVariantDataset, classAndLines);
-					// originalArgoUMLsrc, classAndLines);
 
-					List<String> results = LineTraces2BenchFormat.getResultsInBenchmarkFormat(classAndLines,
+					List<String> results = LineTraces2BenchFormat.getResultsInBenchmarkFormatOnlyClasses(classAndLines,
 							currentFeature, fUtils, pathToOriginalVariantDataset, true);
-					// currentFeature, fUtils, originalArgoUMLsrc, true);
 
 					// Save to file benchmarkFormat results
 					StringBuffer buffer = new StringBuffer();
@@ -224,8 +222,7 @@ public class MetricsModule {
 						resultFeature.add(f13);
 
 						System.out.println("\nLine level metrics");
-						List<Double> metrics = getCSVInformationPerFeature(outputScenarioLine,
-								currentFeature);
+						List<Double> metrics = getCSVInformationPerFeature(outputScenarioLine, currentFeature);
 						System.out.println("Precision: " + metrics.get(0));
 						System.out.println("Recall: " + metrics.get(1));
 						System.out.println("F1: " + metrics.get(2));
@@ -237,8 +234,7 @@ public class MetricsModule {
 		resultsToFile(result, new File(output, "MetricsScenarioFeature.csv"));
 		return result;
 	}
-	
-	
+
 	/**
 	 * Computes precision, recall and f1 at line level
 	 * 
@@ -427,14 +423,11 @@ public class MetricsModule {
 	public static double getAvgF1(Map<String, Map<String, List<Double>>> result) {
 		return getAvg(result, 2);
 	}
-	
+
 	public static ScoreTriplet getAvgScore(Map<String, Map<String, List<Double>>> result) {
 		ScoreTriplet score = new ScoreTriplet();
 		for (Granularity granularity : granularities) {
-			score.add(
-					granularity, 
-					getAvg(result, granularity.precision()),
-					getAvg(result, granularity.recall()),
+			score.add(granularity, getAvg(result, granularity.precision()), getAvg(result, granularity.recall()),
 					getAvg(result, granularity.f1()));
 		}
 		return score;
@@ -461,8 +454,7 @@ public class MetricsModule {
 	/**
 	 * Get all types
 	 * 
-	 * @param a
-	 *            java file
+	 * @param a java file
 	 * @return list of types, that can be more than one
 	 */
 	public static List<TypeDeclaration> getTypes(File f) {

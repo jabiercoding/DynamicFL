@@ -10,7 +10,7 @@ import java.util.Map;
 import utils.FileUtils;
 
 /**
- * Reads data from Gabriela Dataset https://zenodo.org/record/4262529
+ * Reads data from the Dataset
  */
 public class DatasetReader {
 

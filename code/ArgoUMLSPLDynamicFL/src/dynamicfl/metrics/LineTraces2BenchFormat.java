@@ -27,17 +27,27 @@ import utils.TraceIdUtils;
 public class LineTraces2BenchFormat {
 
 	/**
-	 * Create benchmark string with predefined hard-coded thresholds
+	 * Create benchmark strings with predefined hard-coded thresholds
 	 * 
-	 * @param scenarioPath
-	 * @param feature
-	 * 
-	 * @param classAndLines. Key set is the absolute path to each Java file
+	 * @param Strings in the benchmark format
 	 */
 	public static List<String> getResultsInBenchmarkFormat(Map<String, List<Integer>> classAndLines, String feature,
 			FeatureUtils fUtils, File originalArgoUMLsrc, boolean crossVariantsCheck) {
 		return getResultsInBenchmarkFormat(classAndLines, feature, fUtils, originalArgoUMLsrc, crossVariantsCheck, 0.25,
 				0.25, 1, 0.25);
+	}
+
+	/**
+	 * Create benchmark strings. Using 0.0 for the thresholds will make that only
+	 * Class traces will be created, i.e., class trace will be craeted if at least
+	 * one line is executed from this class.
+	 * 
+	 * @return Strings in the benchmark format
+	 */
+	public static List<String> getResultsInBenchmarkFormatOnlyClasses(Map<String, List<Integer>> classAndLines,
+			String feature, FeatureUtils fUtils, File originalArgoUMLsrc, boolean crossVariantsCheck) {
+		return getResultsInBenchmarkFormat(classAndLines, feature, fUtils, originalArgoUMLsrc, crossVariantsCheck, 0.0,
+				0.0, 1, 0.0);
 	}
 
 	/**
